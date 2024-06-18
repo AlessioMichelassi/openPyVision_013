@@ -79,8 +79,8 @@ class mixBusWidget(QWidget):
     def initConnections(self):
         self.uiTimer = QTimer(self)
         self.uiTimer.timeout.connect(self.display_frame)
-        self.uiTimer.start(1000 // 30)
-        QTimer.singleShot(60000, self.stop_app)
+        self.uiTimer.start(1000 // 60)
+
 
     def start_mix(self):
         self.mixBus._mixType = MIX_TYPE.MIX
@@ -91,16 +91,20 @@ class mixBusWidget(QWidget):
         self.mixBus.startStinger()
 
     def wipe_left(self):
-        pass
+        self.mixBus._mixType = MIX_TYPE.WIPE_LEFT
+        self.mixBus.startMix()
 
     def wipe_right(self):
-        pass
+        self.mixBus._mixType = MIX_TYPE.WIPE_RIGHT
+        self.mixBus.startMix()
 
     def wipe_top(self):
-        pass
+        self.mixBus._mixType = MIX_TYPE.WIPE_TOP
+        self.mixBus.startMix()
 
     def wipe_bottom(self):
-        pass
+        self.mixBus._mixType = MIX_TYPE.WIPE_BOTTOM
+        self.mixBus.startMix()
 
     def changeInput(self, newInput):
         self.mixBus.setPreviewInput(newInput)
@@ -118,8 +122,6 @@ class mixBusWidget(QWidget):
             print(e)
             print(type(self.mixBus.getMix()))
 
-    def stop_app(self):
-        self.exit()
 
 class VideoApp(QApplication):
     def __init__(self, argv):
@@ -131,7 +133,7 @@ class VideoApp(QApplication):
 
         self.widget = mixBusWidget(self.synchObject, self.input1, self.input2)
         self.widget.show()
-
+        QTimer.singleShot(60000, self.stop_app)
     def stop_app(self):
         self.exit()
 

@@ -36,7 +36,8 @@ class MixBus014(QObject):
     un QTimer che viene fatto partire generalmente quando si preme il pulsante auto o quando
     si usa la slide bar per fare il mix.
     """
-    effectDuration = 500
+    effectDuration = 200
+    fadeWidth = 50
     lastProgram = None
     errorSignal = pyqtSignal(dict)
 
@@ -59,7 +60,7 @@ class MixBus014(QObject):
         self.stingerObject = StingerLoader(self.synch_object, r"C:\pythonCode\openPyVision_013\testSequence")
 
         # Connect stinger's switching signal to the cut method
-        self.stingerObject.switching_SIGNAL.connect(self.cutOnSwithing)
+        self.stingerObject.switching_SIGNAL.connect(self.cutOnSwitching)
 
     def __del__(self):
         try:
@@ -150,6 +151,14 @@ class MixBus014(QObject):
         else:
             if self._mixType == MIX_TYPE.MIX:
                 return preview_frame, self._mixFrames(preview_frame, program_frame)
+            elif self._mixType == MIX_TYPE.WIPE_RIGHT:
+                return preview_frame, self._hWipe_fromLeft_To_Right(preview_frame, program_frame)
+            elif self._mixType == MIX_TYPE.WIPE_LEFT:
+                return preview_frame, self._hWipe_fromRight_To_Left(preview_frame, program_frame)
+            elif self._mixType == MIX_TYPE.WIPE_TOP:
+                return preview_frame, self._vWipe_fromTop_To_Bottom(preview_frame, program_frame)
+            elif self._mixType == MIX_TYPE.WIPE_BOTTOM:
+                return preview_frame, self._vWipe_fromBottom_To_Top(preview_frame, program_frame)
             elif self._mixType == MIX_TYPE.STINGER:
                 return preview_frame, self._mixStinger(preview_frame, program_frame, self.stingerObject)
             elif self._mixType == MIX_TYPE.STILL:
@@ -168,7 +177,8 @@ class MixBus014(QObject):
         """
         return cv2.addWeighted(_preview_frame, self._fade, _program_frame, 1 - self._fade, 0)
 
-    def _mixStinger(self, _preview_frame, _program_frame, _stingerObject):
+    @staticmethod
+    def _mixStinger(_preview_frame, _program_frame, _stingerObject):
         """
         Lo stinger è una sequenza di immagini con alpha channel che di solito viene usata per
         introdurre replay, per terminare lo stream, per introdurre un ospite, per lo stacco pubblicitario, ecc.
@@ -216,7 +226,7 @@ class MixBus014(QObject):
         """
         self._fade = 0.0
         self.is_mixing = True
-        self.fade_step = 1.0 / (self.effectDuration / (1000 / self.synch_object.fps))
+        self.fade_step = 0.06
         self.effect_TIMER.start(1000 // self.synch_object.fps)
 
     def updateEffect(self):
@@ -236,14 +246,128 @@ class MixBus014(QObject):
                 self.cut()
 
     def startStinger(self):
+        """
+        Fa partire l'animazione dello stinger nello stinger object.
+        :return:
+        """
         self.stingerIndex = 0
         self.lastProgram = self.program_input
         self.is_mixing = True
         self.stingerObject.startAnimation()
 
-    def updateStinger(self):
-        pass
-
-    def cutOnSwithing(self):
+    def cutOnSwitching(self):
+        """
+        Durante lo stinger a volte si vuole fare il cut da program a preview nel momento in cui
+        il frame di program è completamente coperto dallo stinger. Nella classe StingerLoader
+        si può impostare il numero di frame da attendere prima di mandare il segnale per il cut.
+        Di default è impostato a metà della durata dello stinger.
+        :return:
+        """
         self.cut()
-        print("Cutting on switching signal")
+
+    def _hWipe_fromLeft_To_Right(self, preview, program):
+        """
+        Effettua un wipe orizzontale da sinistra a destra.
+        In questa funzione, viene creato un frame combinato composto da due parti:
+        - La prima parte è presa dal frame di preview fino alla posizione del wipe.
+        - La seconda parte è presa dal frame di program dalla posizione del wipe fino alla fine.
+
+        Una striscia verticale di transizione larga 20 pixel viene creata miscelando i pixel di preview e program al 50%.
+
+        :param preview: Frame di preview.
+        :param program: Frame di program.
+        :return: Frame combinato con l'effetto di wipe.
+        """
+        height, width, _ = preview.shape
+        combined_frame = np.copy(preview)
+        fade_width = 5
+        wipe_position = int(self._fade * width)
+        if wipe_position + fade_width <= width:
+            combined_frame[:, wipe_position:wipe_position + fade_width] = (
+                    preview[:, wipe_position:wipe_position + fade_width] * (1 - 0.5) +
+                    program[:, wipe_position:wipe_position + fade_width] * 0.5
+            )
+            combined_frame[:, wipe_position + fade_width:] = program[:, wipe_position + fade_width:]
+        return combined_frame
+
+    def _hWipe_fromRight_To_Left(self, preview, program):
+        """
+        Effettua un wipe orizzontale da destra a sinistra.
+        In questa funzione, viene creato un frame combinato composto da due parti:
+        - La prima parte è presa dal frame di program fino alla posizione del wipe.
+        - La seconda parte è presa dal frame di preview dalla posizione del wipe fino alla fine.
+
+                            A: [AAAAAAAAAA|AAAAAAA]
+                            B: [BBBBBB|BBBBBBBBBB]
+                            C: [AAAAAA|CCC|BBBBBB]
+
+        Una striscia verticale di transizione larga 20 pixel viene creata miscelando i pixel di preview e program al 50%.
+
+        :param preview: Frame di preview.
+        :param program: Frame di program.
+        :return: Frame combinato con l'effetto di wipe.
+        """
+        height, width, _ = preview.shape
+        combined_frame = np.copy(program)
+        fade_width = 5
+        wipe_position = int((1 - self._fade) * width)
+        if wipe_position + fade_width <= width:
+            combined_frame[:, wipe_position:wipe_position + fade_width] = (
+                    preview[:, wipe_position:wipe_position + fade_width] * 0.5 +
+                    program[:, wipe_position:wipe_position + fade_width] * (1 - 0.5)
+            )
+            combined_frame[:, wipe_position + fade_width:] = preview[:, wipe_position + fade_width:]
+        return combined_frame
+
+    def _vWipe_fromTop_To_Bottom(self, preview, program):
+        """
+        Effettua un wipe verticale dall'alto verso il basso.
+        In questa funzione, viene creato un frame combinato composto da due parti:
+        - La prima parte è presa dal frame di preview fino alla posizione del wipe.
+        - La seconda parte è presa dal frame di program dalla posizione del wipe fino alla fine.
+
+        Una striscia orizzontale di transizione larga 20 pixel viene creata miscelando i pixel di preview e program al 50%.
+
+        :param preview: Frame di preview.
+        :param program: Frame di program.
+        :return: Frame combinato con l'effetto di wipe.
+        """
+        height, width, _ = preview.shape
+        wipe_position = int(self._fade * height)
+        combined_frame = np.copy(preview)
+        fade_width = 5
+        if wipe_position + fade_width <= height:
+            combined_frame[wipe_position:wipe_position + fade_width, :] = (
+                    preview[wipe_position:wipe_position + fade_width, :] * (1 - 0.5) +
+                    program[wipe_position:wipe_position + fade_width, :] * 0.5
+            )
+            combined_frame[wipe_position + fade_width:, :] = program[wipe_position + fade_width:, :]
+        return combined_frame
+
+    def _vWipe_fromBottom_To_Top(self, preview, program):
+        """
+        Effettua un wipe verticale dal basso verso l'alto.
+        In questa funzione, viene creato un frame combinato composto da due parti:
+        - La prima parte è presa dal frame di program fino alla posizione del wipe.
+        - La seconda parte è presa dal frame di preview dalla posizione del wipe fino alla fine.
+
+        Una striscia orizzontale di transizione larga 20 pixel viene creata miscelando i pixel di preview e program al 50%.
+
+        :param preview: Frame di preview.
+        :param program: Frame di program.
+        :return: Frame combinato con l'effetto di wipe.
+        """
+        height, width, _ = preview.shape
+        wipe_position = int((1 - self._fade) * height)
+        combined_frame = np.copy(program)
+        fade_width = 5
+        if wipe_position - fade_width >= 0:
+            combined_frame[wipe_position - fade_width:wipe_position, :] = (
+                    preview[wipe_position - fade_width:wipe_position, :] * 0.5 +
+                    program[wipe_position - fade_width:wipe_position, :] * (1 - 0.5)
+            )
+            combined_frame[wipe_position:, :] = preview[wipe_position:, :]
+        else:
+            combined_frame[:, :] = preview[:, :]
+        return combined_frame
+
