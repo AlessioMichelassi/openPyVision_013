@@ -62,6 +62,17 @@ class MonitorWidget012(QWidget):
         self._isGreen = False
         self._isBlue = False
         self._isAlpha = False
+        self._isRGBParade = False
+        self._isWaveform = False
+
+        # Lista di pulsanti per i toggle
+        self.toggleButtons = [
+            (self.btnRed, 'Red'),
+            (self.btnGreen, 'Green'),
+            (self.btnBlue, 'Blue'),
+            (self.btnRGBParade, 'RGBParade'),
+            (self.btnWaveform, 'Waveform')
+        ]
 
         self.cmbViewportMode = QComboBox(self)
         self.initUI()
@@ -186,7 +197,7 @@ class MonitorWidget012(QWidget):
     @staticmethod
     def createColorButton(text, slot, width):
         """
-        Utility function per creare un pulsante colorato con una dimensione specifica.
+        Utility function per creare un pulsante di colore con una larghezza specifica.
         :param text: Testo del pulsante
         :param slot: Funzione da chiamare al clic del pulsante
         :param width: Larghezza del pulsante
@@ -206,8 +217,8 @@ class MonitorWidget012(QWidget):
 
     def feedInput(self, inputNumpyFrame):
         """
-        Imposta il frame di input.
-        :param inputNumpyFrame: Frame di input in formato numpy
+        Fornisce un frame di input da visualizzare nel monitor.
+        :param inputNumpyFrame: Frame di input
         :return: None
         """
         self.feedFrame = inputNumpyFrame
@@ -295,13 +306,7 @@ class MonitorWidget012(QWidget):
         Attiva/disattiva la visualizzazione del grafico RGB Parade.
         :return: None
         """
-        self._isRed = self._isGreen = self._isBlue = False
-        if self.rgbParade is None:
-            self.rgbParade = RGBParade(self.feedFrame)
-            self.scene.addItem(self.rgbParade)
-        else:
-            self.scene.removeItem(self.rgbParade)
-            self.rgbParade = None
+        self.toggleColorChannel('RGBParade')
 
     def setWaveform(self):
         """
@@ -313,14 +318,18 @@ class MonitorWidget012(QWidget):
     def toggleColorChannel(self, color):
         """
         Attiva/disattiva la visualizzazione di un canale colore specifico.
+        Disattiva tutti gli altri canali.
         :param color: Colore da attivare/disattivare
         :return: None
         """
-        setattr(self, f'_is{color}', not getattr(self, f'_is{color}'))
-        if getattr(self, f'_is{color}'):
-            for other_color in ['Red', 'Green', 'Blue', 'Alpha']:
-                if other_color != color:
-                    setattr(self, f'_is{other_color}', False)
+        # Disattiva tutti i pulsanti tranne quello selezionato
+        for btn, col in self.toggleButtons:
+            if col != color:
+                btn.setChecked(False)
+                setattr(self, f'_is{col}', False)
+            else:
+                setattr(self, f'_is{col}', not getattr(self, f'_is{col}'))
+                btn.setChecked(getattr(self, f'_is{col}'))
 
     def setAutoFit(self):
         """
