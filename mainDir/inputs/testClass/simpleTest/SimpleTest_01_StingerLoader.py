@@ -27,7 +27,8 @@ class VideoApp(QApplication):
         self.viewer.setFixedSize(1920, 1080)
         self.uiTimer = QTimer(self)
         self.uiTimer.timeout.connect(self.display_frame)
-        self.uiTimer.start(1000 // 30)  # Update UI at 30 FPS
+        self.uiTimer.start(1000 // 60)  # Update UI at 30 FPS
+        QTimer.singleShot(100, self.input1.startAnimation)
         QTimer.singleShot(10000, self.stop_app)
 
     def display_frame(self):

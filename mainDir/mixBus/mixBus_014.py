@@ -27,7 +27,7 @@ class MIX_TYPE(Enum):
 
 class MixBus014(QObject):
     """
-    MixBus014 è un mixer video che permette di mixare due oggetti input.
+    MixBus014 è il cuore del mixer video e permette di mixare due oggetti input.
     Di default resituisce tramite getMix una tupla: preview, program.
     Se l'effetto è impostato su MIX, restituisce:
     preview, cv2.addWeighted(_preview_frame, self._fade, _program_frame, 1 - self._fade, 0)
@@ -59,7 +59,7 @@ class MixBus014(QObject):
         self.stingerObject = StingerLoader(self.synch_object, r"C:\pythonCode\openPyVision_013\testSequence")
 
         # Connect stinger's switching signal to the cut method
-        self.stingerObject.switching_SIGNAL.connect(self.cut)
+        self.stingerObject.switching_SIGNAL.connect(self.cutOnSwithing)
 
     def __del__(self):
         try:
@@ -239,7 +239,11 @@ class MixBus014(QObject):
         self.stingerIndex = 0
         self.lastProgram = self.program_input
         self.is_mixing = True
-        self.stingerObject.start()
+        self.stingerObject.startAnimation()
 
     def updateStinger(self):
         pass
+
+    def cutOnSwithing(self):
+        self.cut()
+        print("Cutting on switching signal")

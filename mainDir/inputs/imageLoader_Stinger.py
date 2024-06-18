@@ -23,6 +23,7 @@ class StingerLoader(BaseClass):
 
     def __init__(self, synchObject, stinger_folder, resolution=QSize(1920, 1080)):
         super().__init__(synchObject, resolution)
+        self.isStarted = False
         self.stinger_folder = stinger_folder
         self.stingerLength = 0
         self._isLooped = False
@@ -32,6 +33,7 @@ class StingerLoader(BaseClass):
         self.switchingFrameNumber = self.stingerLength // 2 # Default a metà della sequenza
         self._frame = self.images[self._current_image_index] if self.images else np.zeros(
             (resolution.height(), resolution.width(), 4), dtype=np.uint8)  # Include il canale alpha
+        self.synchObject.synch_SIGNAL.connect(self.capture_frame)
 
     def load_images(self):
         images = []
@@ -48,25 +50,31 @@ class StingerLoader(BaseClass):
     def stop(self):
         super().stop()
 
-    def start(self):
-        self.synchObject.Synch_SIGNAL.connect(self.capture_frame)
+    def startAnimation(self):
+        self.isStarted = True
 
     def capture_frame(self):
         """
         In questo caso in capture frame viene implementata la logica per aumentare l'indice dell'immagine corrente.
         :return:
         """
-        self._current_image_index += 1
-        if self._current_image_index >= self.stingerLength:
-            self._current_image_index = 0
-            self._switching_signal_sent = False  # Reset al termine del loop
-            if not self._isLooped:
-                self.synchObject.Synch_SIGNAL.disconnect(self.capture_frame)
-        if self._current_image_index == self.switchingFrameNumber and not self._switching_signal_sent:
-            self.switching_SIGNAL.emit()
-            self._switching_signal_sent = True  # Imposta come inviato
-        if self.images:
-            self._frame = self.images[self._current_image_index]
+        if self.isStarted:
+            self._current_image_index += 1
+            if self._current_image_index >= self.stingerLength:
+                self._current_image_index = 0
+                self._switching_signal_sent = False  # Reset al termine del loop
+                if not self._isLooped:
+                    self.isStarted = False
+            if self._current_image_index == self.switchingFrameNumber and not self._switching_signal_sent:
+                print(f"Switching signal sent at frame {self._current_image_index} while total frames are "
+                      f"{self.stingerLength} and switching frame is {self.switchingFrameNumber}")
+                self.switching_SIGNAL.emit()
+                self._switching_signal_sent = True  # Imposta come inviato
+            if self.images:
+                self._frame = self.images[self._current_image_index]
+        else:
+            self._frame = self.images[self._current_image_index] if self.images else np.zeros(
+                (self.resolution.height(), self.resolution.width(), 4), dtype=np.uint8)
         self.update_fps()
 
     def setIndex(self, index):
