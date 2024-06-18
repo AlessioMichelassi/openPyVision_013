@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import *
 from mainDir.inputs.synchObject import SynchObject
 
 
-# from synchObject import SynchObject
+# ATTENZIONE REFACTORING NEEDED
 
 class BaseClass:
     def __init__(self, synchObject, resolution=QSize(1920, 1080)):
@@ -170,13 +170,13 @@ class VideoApp(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
         self.synchObject = SynchObject(50)
-        self.input1 = VideoCaptureSimple(self.synchObject, input_index=0, isUSB_Cam=True)
+        self.input1 = VideoCaptureSimple(self.synchObject, input_index=5, isUSB_Cam=True)
         self.widget = QWidget()
         self.mainLayout = QVBoxLayout()
         self.viewer = QLabel()
         self.fpsLabel = QLabel()
         self.displayLabel = QLabel()
-        self.gammaSlider = QSlider(Qt.Horizontal)
+        self.gammaSlider = QSlider(Qt.Orientation.Horizontal)
         self.invertButton = QPushButton("Invert Image")
         self.grayButton = QPushButton("Grayscale Image")
 

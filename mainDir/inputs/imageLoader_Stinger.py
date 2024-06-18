@@ -6,105 +6,93 @@ from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from mainDir.inputs.baseClass import BaseClass
 
+"""
+La classe stingerLoader permette di caricare una sequenza di immagini PNG con canale alpha. Tramite getFrame si ottiene
+l'immagine corrente. Nel caso in cui si necessiti di un frame di fill e di key, è possibile utilizzare il metodo
+getFillAndKey che restituisce una tupla (bgr, alpha), dove alpha non è un immagine a 3 canali ma è monocanale in modo 
+da essere poter essere usata nelle operazioni di blending.
+Il metodo setSwitchingFrameNumber permette di impostare il frame in cui emettere il segnale di switching. Se usato 
+durante il mix live di solito si vuole passare da program a preview quando l'immagine di sting è a schermo pieno. Di
+Default viene settata a metà della sequenza di immagini, ma è possibile variarla a piacimento.
+Il metodo setLoop permette di impostare se la sequenza di immagini deve essere in loop o meno.
+"""
+
 
 class StingerLoader(BaseClass):
+    switching_SIGNAL = pyqtSignal()  # Segnale per indicare il frame di switching
+
     def __init__(self, synchObject, stinger_folder, resolution=QSize(1920, 1080)):
         super().__init__(synchObject, resolution)
         self.stinger_folder = stinger_folder
+        self.stingerLength = 0
+        self._isLooped = False
+        self._switching_signal_sent = False  # Variabile per tenere traccia del segnale di switching
         self.images = self.load_images()
-        self.current_image_index = 0
-        self._frame = self.images[self.current_image_index] if self.images else np.zeros(
-            (resolution.height(), resolution.width(), 3), dtype=np.uint8)
+        self._current_image_index = 0
+        self.switchingFrameNumber = self.stingerLength // 2 # Default a metà della sequenza
+        self._frame = self.images[self._current_image_index] if self.images else np.zeros(
+            (resolution.height(), resolution.width(), 4), dtype=np.uint8)  # Include il canale alpha
 
     def load_images(self):
         images = []
         for filename in sorted(os.listdir(self.stinger_folder)):
             if filename.endswith('.png'):
                 image_path = os.path.join(self.stinger_folder, filename)
-                image = cv2.imread(image_path)
+                image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)  # Legge anche il canale alpha
                 if image is not None:
                     image = cv2.resize(image, (self.resolution.width(), self.resolution.height()))
                     images.append(image)
+        self.stingerLength = len(images)
         return images
 
     def stop(self):
         super().stop()
 
+    def start(self):
+        self.synchObject.Synch_SIGNAL.connect(self.capture_frame)
+
     def capture_frame(self):
+        """
+        In questo caso in capture frame viene implementata la logica per aumentare l'indice dell'immagine corrente.
+        :return:
+        """
+        self._current_image_index += 1
+        if self._current_image_index >= self.stingerLength:
+            self._current_image_index = 0
+            self._switching_signal_sent = False  # Reset al termine del loop
+            if not self._isLooped:
+                self.synchObject.Synch_SIGNAL.disconnect(self.capture_frame)
+        if self._current_image_index == self.switchingFrameNumber and not self._switching_signal_sent:
+            self.switching_SIGNAL.emit()
+            self._switching_signal_sent = True  # Imposta come inviato
         if self.images:
-            self._frame = self.images[self.current_image_index]
-            self.current_image_index = (self.current_image_index + 1) % len(self.images)
+            self._frame = self.images[self._current_image_index]
         self.update_fps()
+
+    def setIndex(self, index):
+        self._current_image_index = index
+
+    def getCurrentIndex(self):
+        return self._current_image_index
+
+    def setSwitchingFrameNumber(self, frameNumber):
+        self.switchingFrameNumber = frameNumber
 
     def getFrame(self):
         return self._frame
 
+    def getFillAndKey(self):
+        """
+        Ritorna il frame di fill e di key.
+        Il key è una matrice singola e può quindi essere usata nelle operazioni di blending.
+        :return:
+        """
+        black = np.zeros((self.resolution.height(), self.resolution.width(), 3), dtype=np.uint8)
+        alpha = np.zeros((self.resolution.height(), self.resolution.width()), dtype=np.uint8)
+        if self._frame is None:
+            return black, alpha
+        b, g, r, a = cv2.split(self._frame)
+        return cv2.merge((b, g, r)), a
 
-# Example usage of the StingerLoader class
-
-if __name__ == "__main__":
-    import sys
-    import time
-
-    from PyQt6.QtWidgets import *
-    from PyQt6.QtCore import *
-    from PyQt6.QtGui import *
-
-    from mainDir.inputs.synchObject import SynchObject
-
-
-    class VideoApp(QApplication):
-        def __init__(self, argv):
-            super().__init__(argv)
-            self.synchObject = SynchObject(60)  # Set FPS to 60
-            self.input1 = StingerLoader(self.synchObject, r"C:\pythonCode\openCVision012\openCVision012\testSequence")
-            self.widget = QWidget()
-            self.mainLayout = QVBoxLayout()
-            self.viewer = QLabel()
-            self.fpsLabel = QLabel()
-            self.displayLabel = QLabel()
-            self.mainLayout.addWidget(self.viewer)
-            self.mainLayout.addWidget(self.fpsLabel)
-            self.mainLayout.addWidget(self.displayLabel)
-            self.widget.setLayout(self.mainLayout)
-            self.widget.show()
-            self.viewer.setFixedSize(1920, 1080)
-            self.uiTimer = QTimer(self)
-            self.uiTimer.timeout.connect(self.display_frame)
-            self.uiTimer.start(1000 // 30)  # Update UI at 30 FPS
-            QTimer.singleShot(10000, self.stop_app)
-
-        def display_frame(self):
-            frame = self.input1.getFrame()
-            if frame is not None and frame.size != 0:
-                start_time = time.time()
-                image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format.Format_BGR888)
-                self.viewer.setPixmap(QPixmap.fromImage(image))
-                display_time = time.time() - start_time
-                self.displayLabel.setText(f"Frame displayed in {display_time:.6f} seconds")
-                self.fpsLabel.setText(f"FPS: {self.input1.fps:.2f}")
-
-        def stop_app(self):
-            print(f"Media FPS: {self.input1.fps:.2f}")
-            self.exit()
-
-
-    def main():
-        app = VideoApp(sys.argv)
-        app.exec()
-
-
-    if __name__ == '__main__':
-        import cProfile
-        import pstats
-        import io
-
-        pr = cProfile.Profile()
-        pr.enable()
-        main()
-        pr.disable()
-        s = io.StringIO()
-        sortby = 'cumulative'
-        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-        ps.print_stats()
-        print(s.getvalue())
+    def setLoop(self, isLooped):
+        self._isLooped = isLooped

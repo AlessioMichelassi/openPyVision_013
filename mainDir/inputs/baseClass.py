@@ -4,7 +4,7 @@ import numpy as np
 from PyQt6.QtCore import *
 
 
-class BaseClass:
+class BaseClass(QObject):
     _frame = None
     isALoadTesting = False
     _gamma_correction = 1.0
@@ -12,6 +12,7 @@ class BaseClass:
     isNegative = False
 
     def __init__(self, synchObject, resolution=QSize(1920, 1080)):
+        super().__init__()
         self.synchObject = synchObject
         self.resolution = resolution
         self.synchObject.synch_SIGNAL.connect(self.capture_frame)

@@ -1,19 +1,19 @@
-import sys
 import time
 
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 
+from mainDir.inputs.imageLoader_Stinger import StingerLoader
 from mainDir.inputs.synchObject import SynchObject
-from mainDir.inputs.videoCapture import VideoCaptureSimple
 
 
 class VideoApp(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
-        self.synchObject = SynchObject(60)
-        self.input1 = VideoCaptureSimple(self.synchObject, input_index=5)
+        self.synchObject = SynchObject(60)  # Set FPS to 60
+        self.input1 = StingerLoader(self.synchObject, r"C:\pythonCode\openPyVision_013\testSequence")
+        self.input1.setLoop(True)
         self.widget = QWidget()
         self.mainLayout = QVBoxLayout()
         self.viewer = QLabel()
@@ -27,11 +27,11 @@ class VideoApp(QApplication):
         self.viewer.setFixedSize(1920, 1080)
         self.uiTimer = QTimer(self)
         self.uiTimer.timeout.connect(self.display_frame)
-        self.uiTimer.start(1000 // 60)  # Update UI at 60 FPS
+        self.uiTimer.start(1000 // 30)  # Update UI at 30 FPS
         QTimer.singleShot(10000, self.stop_app)
 
     def display_frame(self):
-        frame = self.input1.getFrame()
+        frame, _ = self.input1.getFillAndKey()
         if frame is not None and frame.size != 0:
             start_time = time.time()
             image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format.Format_BGR888)
@@ -42,26 +42,31 @@ class VideoApp(QApplication):
 
     def stop_app(self):
         print(f"Media FPS: {self.input1.fps:.2f}")
-        self.input1.stop()
         self.exit()
 
 
-def main():
-    app = VideoApp(sys.argv)
-    app.exec()
+# Example usage of the ColorGenerator class
+
+if __name__ == "__main__":
+    import sys
 
 
-if __name__ == '__main__':
-    import cProfile
-    import pstats
-    import io
+    def main():
+        app = VideoApp(sys.argv)
+        app.exec()
 
-    pr = cProfile.Profile()
-    pr.enable()
-    main()
-    pr.disable()
-    s = io.StringIO()
-    sortby = 'cumulative'
-    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    ps.print_stats()
-    print(s.getvalue())
+
+    if __name__ == '__main__':
+        import cProfile
+        import pstats
+        import io
+
+        pr = cProfile.Profile()
+        pr.enable()
+        main()
+        pr.disable()
+        s = io.StringIO()
+        sortby = 'cumulative'
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
