@@ -36,16 +36,18 @@ class MonitorWidget012(QWidget):
         self.isPrg = isPrg
         self.syncObject = _syncObject
 
+        # Creazione della scena grafica e della vista grafica
         self.scene = GraphicSceneOverride012()
         self.view = GraphicViewOverride(self.scene)
 
-        # il clean feed preso dal mixBus viene inserito in questo oggetto
+        # Il clean feed preso dal mixBus viene inserito in questo oggetto
         self.graphicObject = QGraphicsPixmapItem()
         self.scene.addItem(self.graphicObject)
 
         self.feedFrame = None
         self.rgbParade = None
-        # inizializzazione dei pulsanti
+
+        # Inizializzazione dei pulsanti
         self.btnFitInView = QPushButton("Fit in View")
         self.btnRed = self.createButton("R", self.setRed)
         self.btnGreen = self.createButton("G", self.setGreen)
@@ -66,12 +68,22 @@ class MonitorWidget012(QWidget):
         self.initConnections()
         self.initRenderProperties()
 
+        # Collegamento del segnale di sincronizzazione all'aggiornamento del frame
         self.syncObject.synch_SIGNAL.connect(self.updateFrame)
 
     def closeEvent(self, event):
+        """
+        Gestisce l'evento di chiusura della finestra.
+        :param event: Evento di chiusura
+        :return: None
+        """
         super().closeEvent(event)
 
     def initUI(self):
+        """
+        Inizializza l'interfaccia utente, organizzando i layout e aggiungendo widget.
+        :return: None
+        """
         mainLayout = QVBoxLayout()
         mainLayout.addLayout(self.initViewPortButtons())
         mainLayout.addWidget(self.view)
@@ -81,16 +93,16 @@ class MonitorWidget012(QWidget):
     def initViewPortButtons(self):
         """
         Inizializza i pulsanti per la gestione della viewPort.
-        la graphicView può essere aggiornata in tre modi:
+        La graphicView può essere aggiornata in tre modi:
         - minimal: solo quando è necessario
         - smart: quando è necessario e in modo intelligente
         - full: sempre
-        openGL è un'opzione che permette di usare la GPU per il rendering.
+        OpenGL è un'opzione che permette di usare la GPU per il rendering.
         SmoothPixmapTransformation permette di fare il rendering delle immagini in modo più fluido.
         Antialiasing permette di avere un rendering più pulito.
         Ovviamente siccome alcune opzioni possono essere pesanti, è possibile disattivarle.
-        di default nel monitor di preview alcune voci sono disattivate.
-        :return:
+        Di default nel monitor di preview alcune voci sono disattivate.
+        :return: Layout dei pulsanti
         """
         self.cmbViewportMode.addItems(["minimal", "smart", "full"])
         self.cmbViewportMode.currentIndexChanged.connect(self.setViewportMode)
@@ -113,9 +125,9 @@ class MonitorWidget012(QWidget):
     def createButton(text, slot):
         """
         Utility function per creare un pulsante con uno stile specifico.
-        :param text:
-        :param slot:
-        :return:
+        :param text: Testo del pulsante
+        :param slot: Funzione da chiamare al clic del pulsante
+        :return: QPushButton
         """
         btn = QPushButton(text)
         btn.setStyleSheet(btnMonitorStyle)
@@ -126,8 +138,8 @@ class MonitorWidget012(QWidget):
     def initRenderProperties(self):
         """
         Inizializza le proprietà di rendering della view.
-        se isPrg è True, allora le opzioni di rendering sono più pesanti.
-        :return:
+        Se isPrg è True, allora le opzioni di rendering sono più pesanti.
+        :return: None
         """
         self.view.setRenderHint(QPainter.RenderHint.TextAntialiasing, True)
         if self.isPrg:
@@ -150,6 +162,10 @@ class MonitorWidget012(QWidget):
         self.btnOpenGL.setChecked(True)
 
     def initButtonsLayer(self):
+        """
+        Inizializza i pulsanti del livello inferiore dell'interfaccia utente.
+        :return: Layout dei pulsanti
+        """
         self.btnFitInView.clicked.connect(self.fitInView)
         spacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         buttonLayout = QHBoxLayout()
@@ -169,21 +185,45 @@ class MonitorWidget012(QWidget):
 
     @staticmethod
     def createColorButton(text, slot, width):
+        """
+        Utility function per creare un pulsante colorato con una dimensione specifica.
+        :param text: Testo del pulsante
+        :param slot: Funzione da chiamare al clic del pulsante
+        :param width: Larghezza del pulsante
+        :return: QPushButton
+        """
         btn = QPushButton(text)
         btn.setFixedWidth(width)
         btn.clicked.connect(slot)
         return btn
 
     def initConnections(self):
+        """
+        Inizializza le connessioni dei segnali.
+        :return: None
+        """
         self.view.currentScaleChange.connect(self.setlblScale)
 
     def feedInput(self, inputNumpyFrame):
+        """
+        Imposta il frame di input.
+        :param inputNumpyFrame: Frame di input in formato numpy
+        :return: None
+        """
         self.feedFrame = inputNumpyFrame
 
     def getDirtyFrame(self):
+        """
+        Restituisce il frame sporco della scena.
+        :return: Frame sporco
+        """
         return self.scene.getDirtyFrame()
 
     def updateFrame(self):
+        """
+        Aggiorna il frame visualizzato nel monitor.
+        :return: None
+        """
         if self.feedFrame is None:
             frame = np.zeros((1080, 1920, 3), dtype=np.uint8)
         else:
@@ -194,6 +234,11 @@ class MonitorWidget012(QWidget):
             self.rgbParade.source = self.feedFrame
 
     def processFrame(self, frame):
+        """
+        Elabora il frame di input per visualizzare solo il canale selezionato.
+        :param frame: Frame di input
+        :return: Frame elaborato
+        """
         if self._isRed:
             frame = self.extractChannel(frame, 0)
         elif self._isGreen:
@@ -206,24 +251,50 @@ class MonitorWidget012(QWidget):
 
     @staticmethod
     def extractChannel(frame, channel):
+        """
+        Estrae un canale specifico dal frame.
+        :param frame: Frame di input
+        :param channel: Canale da estrarre
+        :return: Frame con solo il canale estratto
+        """
         channels = cv2.split(frame)
         if len(channels) == 4:
             channels = channels[:3] + [channels[channel]]
         return cv2.merge([channels[channel]] * 3)
 
     def fitInView(self):
+        """
+        Adatta la vista al contenuto della scena.
+        :return: None
+        """
         self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def setRed(self):
+        """
+        Attiva/disattiva la visualizzazione del canale rosso.
+        :return: None
+        """
         self.toggleColorChannel('Red')
 
     def setGreen(self):
+        """
+        Attiva/disattiva la visualizzazione del canale verde.
+        :return: None
+        """
         self.toggleColorChannel('Green')
 
     def setBlue(self):
+        """
+        Attiva/disattiva la visualizzazione del canale blu.
+        :return: None
+        """
         self.toggleColorChannel('Blue')
 
     def setRGBParade(self):
+        """
+        Attiva/disattiva la visualizzazione del grafico RGB Parade.
+        :return: None
+        """
         self._isRed = self._isGreen = self._isBlue = False
         if self.rgbParade is None:
             self.rgbParade = RGBParade(self.feedFrame)
@@ -233,9 +304,18 @@ class MonitorWidget012(QWidget):
             self.rgbParade = None
 
     def setWaveform(self):
+        """
+        Attiva/disattiva la visualizzazione del grafico Waveform.
+        :return: None
+        """
         self.toggleColorChannel('Waveform')
 
     def toggleColorChannel(self, color):
+        """
+        Attiva/disattiva la visualizzazione di un canale colore specifico.
+        :param color: Colore da attivare/disattivare
+        :return: None
+        """
         setattr(self, f'_is{color}', not getattr(self, f'_is{color}'))
         if getattr(self, f'_is{color}'):
             for other_color in ['Red', 'Green', 'Blue', 'Alpha']:
@@ -243,27 +323,58 @@ class MonitorWidget012(QWidget):
                     setattr(self, f'_is{other_color}', False)
 
     def setAutoFit(self):
+        """
+        Adatta automaticamente la vista al contenuto della scena.
+        :return: None
+        """
         self.fitInView()
 
     def setlblScale(self, scale):
+        """
+        Imposta l'etichetta della scala.
+        :param scale: Scala attuale
+        :return: None
+        """
         self.lblSize.setText(f'{scale:.4f}')
 
     def setViewportMode(self, index):
+        """
+        Imposta la modalità di aggiornamento della viewport.
+        :param index: Indice della modalità
+        :return: None
+        """
         modes = [QGraphicsView.ViewportUpdateMode.MinimalViewportUpdate,
                  QGraphicsView.ViewportUpdateMode.SmartViewportUpdate,
                  QGraphicsView.ViewportUpdateMode.FullViewportUpdate]
         self.view.setViewportUpdateMode(modes[index])
 
     def setAntialiasing(self):
+        """
+        Attiva/disattiva l'antialiasing.
+        :return: None
+        """
         self.view.setRenderHint(QPainter.RenderHint.Antialiasing, self.btnAntialiasing.isChecked())
 
     def setSmoothPixmapTransformation(self):
+        """
+        Attiva/disattiva la trasformazione fluida delle pixmap.
+        :return: None
+        """
         self.view.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, self.btnSmootPixmapTransformation.isChecked())
 
     def setOpenGL(self):
+        """
+        Attiva/disattiva l'uso di OpenGL per il rendering.
+        :return: None
+        """
         self.view.turnOnOpenGL(self.btnOpenGL.isChecked())
 
     def updateFps(self, fps):
+        """
+        Aggiorna l'etichetta degli FPS.
+        :param fps: Valore degli FPS
+        :return: None
+        """
         self.lblFps.setText(f"FPS: {fps:.2f}")
 
 
@@ -272,6 +383,10 @@ if __name__ == '__main__':
     from mainDir.inputs.generator_bars_EBU import FullBarsGenerator
 
     def updateMonitor():
+        """
+        Aggiorna il monitor con il frame corrente e il valore degli FPS.
+        :return: None
+        """
         monitor.feedInput(input1.getFrame())
         monitor.updateFps(input1.fps)
 
