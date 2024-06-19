@@ -6,6 +6,7 @@ from PyQt6.QtGui import *
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import *
 
+from mainDir.ouputs.mainOut_Viewer import CV_MainOutViewer
 from mainDir.widgets.generics.btnStyle import btnMonitorStyle
 from mainDir.widgets.graphicEngine.graphicSceneOverride012 import GraphicSceneOverride012
 from mainDir.widgets.graphicEngine.graphicViewOverride import GraphicViewOverride
@@ -398,12 +399,14 @@ if __name__ == '__main__':
         """
         monitor.feedInput(input1.getFrame())
         monitor.updateFps(input1.fps)
+        mainOut.feedFrame(monitor.getDirtyFrame())
 
     app = QApplication(sys.argv)
     synchObject = SynchObject()
     input1 = FullBarsGenerator(synchObject)
     monitor = MonitorWidget012(synchObject, isPrg=False)
     monitor.setFixedSize(1280, 720)
+    mainOut = CV_MainOutViewer(input1.getFrame())
     synchObject.synch_SIGNAL.connect(updateMonitor)
     monitor.show()
     sys.exit(app.exec())
