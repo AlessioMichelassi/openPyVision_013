@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QColor
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
 
 
 class CustomButton(QPushButton):
@@ -63,7 +63,7 @@ class ContextMenuButton(CustomButton):
     def __init__(self, text, options, mainColor=QColor(255, 128, 10), parent=None):
         super(ContextMenuButton, self).__init__(text, mainColor, parent)
         self.options = options
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self.openContextMenu)
 
     def openContextMenu(self, position):
@@ -71,7 +71,7 @@ class ContextMenuButton(CustomButton):
         for option in self.options:
             action = menu.addAction(option)
             action.triggered.connect(lambda _, opt=option: self.setObjectName(opt))
-        menu.exec_(self.mapToGlobal(position))
+        menu.exec(self.mapToGlobal(position))
 
 
 # TEST CLASS
@@ -91,4 +91,4 @@ if __name__ == "__main__":
     app = QApplication([])
     test = TestContextMenuButton()
     test.show()
-    app.exec_()
+    app.exec()

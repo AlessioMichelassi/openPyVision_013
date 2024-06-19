@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
 
 
 class WidgetHelper:
@@ -26,7 +26,7 @@ class WidgetHelper:
             if style:
                 widget.setStyleSheet(style)
             if isinstance(widget, QLineEdit):
-                widget.setAlignment(Qt.AlignCenter)
+                widget.setAlignment(Qt.AlignmentFlag.AlignCenter)
             if isinstance(widget, QPushButton):
                 widget.setCheckable(setCheckable)
                 if functionCall:
