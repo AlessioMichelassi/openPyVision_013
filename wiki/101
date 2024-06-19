@@ -1,0 +1,70 @@
+Un mixer video è un dispositivo che consente di passare da un segnale video all'altro in modo seamless senza che si
+possa percepire il passaggio. In commercio esistono mixer video di varie dimensioni e con diverse funzionalità, ma grosso modo,
+l'interfaccia base è simile e questo permette ai professionisti di avere una certa confidenza operativa senza dover imparare
+un nuovo strumento. Oltre ai mixer e alle matrici spesso durante conferenze e convegni si usano dei processori di segnale
+che imitano un pò le funzionalità di un mixer video senza però rispecchiarne l'interfaccia. Nonostante siano comodi, spesso
+popenti e versatili, eseguire le operazioni che di solito si fanno con un mixer video su un processore di segnale è molto
+più complicato e richiede una certa esperienza. NOn c'è una standardizzazione delle interfacce e ogni marca è un pò come
+se tentasse di reinventare la ruota per cercare di differenziarsi dalla concorrenza. Questo rende difficile per un tecnico
+che si trova a dover utilizzare un processore di segnale diverso da quello a cui è abituato, riuscire a svolgere il proprio
+lavoro.
+
+La mia idea è quindi di creare, nei limiti del possibile, un software per il missaggio video che sia il più possibile
+standardizzato e che possa essere utilizzato da chiunque abbia una minima esperienza con i mixer video, ma con alcune funzioni
+aggiuntive che possano rendere il lavoro più semplice e veloce. Ho un background di studi in effetti speciali e animazione
+ho studiato per diverso tempo le potenzialità di software come Shake di Ron Brinkman, di cui fra l'altro ho avuto la fortuna
+di seguire un corso online che mi ha permesso di apprendere molte delle potenzialità di quella che all'epoca veniva chiamata
+compute vision. Steve Wright, nel suo libro Digital Compositing for Film and Video, va un pò più oltre ron Brinkman e riesce
+in modo semplice a far digerire al lettore la matematica di base che sta dietro a queste operazioni.
+
+In Italia purtroppo, dove vivo e lavoro, non sono mai riuscito a trovare dei lavori che mi permettessero di mettere
+in pratica queste conoscenze, la maggior parte delle soluzioni che esistevano all'epoca, quando erano studente,
+prevedevano squadre di persone che lavoravano insieme su ogni singolo fotogramma ed era molto difficile riuscire a
+proporre certe tecniche senza avere un team dietro.
+
+Poco prima del covid, una produzione televisiva con cui collaboravo da anni ha deciso di chiudere il canale perchè non era
+più considerato remunerativo e il rapporto di collaborazione che avevo con altre società che lavoravano nei congressi, nelle
+convention era un pò in declino. Insomma, avevo una gran voglia di fare qualcosa di nuovo, di prendere di nuovo in mano tutto quello
+che avevo messo da parte e ricreare la situazione che mi aveva permesso di lavorare con passione per tanti anni, ma in un altro settore.
+
+Il primo step che ho colto, è stato il reddito di cittadinanza, un sorta di bonus sociale che lo stato italiano ha messo a disposizione
+per aiutare le persone che si sono trovate senza lavoro e con pochi risparmi. Il covid poi ha allungato questo periodo di meditazione
+che mi ha permesso di immergermi ancora di più negli studi. Inizialmente, non ho puntato a fare un certo corso per ottenere la certificazione,
+in parte per risparmiare, in parte perchè non ero sicuro di tanti aspetti di questa mia decisione. Nonostante volessi
+da una parte cambiare direzione, dall'altra colmare le mie lacune, ho cominciato a fare un pò l'uno e un pò l'altro,
+fino a quando non sono uscite le prime intelligenze artificiali generative.
+
+L'intelligenza artificiale è molto documentata sul web, ma non è facile trovare informazioni che siano utili per chi vuole
+imparare a fare qualcosa di concreto. C'era un corso che si chiamava Pollo Watslick sul machine learning, la parte open source
+su you tube era promettente, mi ero letto il libro FAST API  mi stava piacendo il metodo che mi stavano insegnando e
+ho deciso di seguire il corso ibm di machine learning. Par Nono stante tutto questo possa sembrare abbastanza incompatibile
+con il mio background, in realtà, ho usato librerie scritte per fare calcoli sulle matrici a velocità della luce e mentre
+facevo il corso mi è venuto in mente che forse potevo usare queste conoscenze per fare qualcosa di concreto anche nell'altro
+settore: quello degli eventi dal vivo.
+
+Avevo scritto un tool per semplificare la programmazione di vMix per mettere in onda titoli, grafiche, formazioni e statistiche
+eliminando tutta una parte della ritualità che occorre per farlo manualmente. L' idea è piaciuta, ma non c'erano soldi
+e il ruolo che ricoprivo nell'azienda a cui l'ho proposto non mi rendeva così facile presentarmi e dare garanzie che
+funzionasse in diretta e via discorrendo, però, scrivendo mi sono accorto che che nonostrante funzioni bene vMix
+ha delle limitazioni da alcuni punti di vista e per certi versi è più simile ad un mixer grafico più che a un mixer video.
+
+A tempo perso mi sono messo quindi a recuperare tutti gli algoritmi che conoscevo, da applicare alle immagini e ho fatto una
+selezione per capire quali potessero essere utili per avere un qualcosa che funzionasse in tempo reale. Ho scritto un
+prima bozza del programma. Avevo due input, un rumore casuale e un video capture. Potevo fare il fade e il cut tra i due.
+Incredibile ho pensato ce l'ho fatta poi però ho duvuto mettere da parte il progectto perchè stavo lavorando in un posto
+che usava delle telecamere remotate. L'interfaccia era ed è scomoda perchè in una pagina sistemi i parametri di colore, shutter,
+poi devi tipo uscire da questa modalità e ti devi riloggare per muovere la camera. Insomma, ho pensato che forse potevo
+fare qualcosa di simile a quello che avevo fatto con vMix, ma per le telecamere onvif. Non tutto quello che puoi fare
+con le telecamere onvif, lo puoi fare ad esempio con il protocollo VISCA. Questa pausa però mi ha permesso di riflettere
+e mettere a fuoco le esigenze di chi lavora con le telecamere e i mixer video.
+
+Il mio obiettivo è quindi quello di creare un software che possa essere utilizzato da chiunque abbia una minima esperienza
+con i mixer video, ma che abbia anche un pò di vocazione per il compositing live e più in la per l'animazione delle camere remotate,
+delle luci, ma anche dell'audio. Amo i silent movie, ma purtroppo non li accetta più nessuno. Quindi ho cominciato anche a studiare
+il modo di poter fare un audio sincrono con il video.
+
+Opencv è una libreria molto potente che permette di fare molte operazioni sulle immagini e alcune operazioni sono molto veloci.
+In python, rispetto al C++ usa una struttura dati che hpo studiato nei corsi da data analyst: NUMPY. Questa struttura dati
+usata in un certo modo permette di fare calcoli molto veloci sulle matrici a frequenza elevata. E' tutto ancora un pò sperimentale,
+sto tentando di unire la teoria alla pratica e vedere cosa ne esce fuori.
+

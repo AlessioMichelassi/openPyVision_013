@@ -33,7 +33,7 @@ class StingerLoader(BaseClass):
         self.switchingFrameNumber = self.stingerLength // 2 # Default a metà della sequenza
         self._frame = self.images[self._current_image_index] if self.images else np.zeros(
             (resolution.height(), resolution.width(), 4), dtype=np.uint8)  # Include il canale alpha
-        self.synchObject.synch_SIGNAL.connect(self.capture_frame)
+        self.synch_Object.synch_SIGNAL.connect(self.capture_frame)
 
     def load_images(self):
         images = []

@@ -29,14 +29,14 @@ class ScreenCapture(BaseClass):
                 raise IndexError(f"Screen index {screen_index} out of range. Available screens: {len(screens)}")
             self.camera = dxcam.create(output_idx=screen_index, output_color="BGR", max_buffer_len=512)
             self.camera.start(target_fps=self.targetFps, video_mode=True)
-            self.synchObject.synch_SIGNAL.connect(self.capture_frame)
+            self.synch_Object.synch_SIGNAL.connect(self.capture_frame)
             QTimer.singleShot(1000, self.checkSize)  # Controlla la dimensione del frame dopo 1 secondo
         except Exception as e:
             print(f"Failed to open screen source {screen_index}: {e}")
             try:
                 self.camera = dxcam.create(output_idx=0, output_color="BGR", max_buffer_len=512)
                 self.camera.start(target_fps=self.targetFps, video_mode=True)
-                self.synchObject.synch_SIGNAL.connect(self.capture_frame)
+                self.synch_Object.synch_SIGNAL.connect(self.capture_frame)
                 QTimer.singleShot(1000, self.checkSize)
             except Exception as e:
                 print(f"Failed to fallback to screen source 0: {e}")
