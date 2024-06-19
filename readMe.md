@@ -18,6 +18,6 @@ Technical Details:
 - Open Source: OpenPyVision is open source with no commercial limitations. If you find something useful, please credit the author or the program.
 - Compatibility: Tested on Windows 10 and Windows 11. While theoretically portable to Linux, the screen capture component, based on Ra1nty Rain's DXCam (capable of 240Hz+ capturing!), would need to be rewritten for Linux.
 
-![OpenPyVision](openPyVision_013\imgs\version012.png)
+![OpenPyVision](https://github.com/AlessioMichelassi/openPyVision_013/blob/master/imgs/version012.png)
 
 Experience the power and flexibility of OpenPyVision for your real-time video mixing needs.
