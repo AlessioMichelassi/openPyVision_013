@@ -16,7 +16,7 @@ class MixerPanelWidget_012(QWidget):
     tally_SIGNAL = pyqtSignal(dict, name="btnClicked_SIGNAL")
     height = 60
     width = 100
-    factor = 0.8
+    factor = 0.65
     blinkingTime = 100
     labelNames = ["input1", "input2", "input3", "input4", "input5", "input6", "input7", "input8", "input9", "input10",
                   "input11", "input12", "input13", "input14", "input15", "input16"]

@@ -91,7 +91,7 @@ class VideoMixerUI(QWidget):
         self.setLayout(main_layout)
 
     def initGeometry(self):
-        self.setGeometry(100, 100, 1920, 1080)
+        self.setFixedSize(1920, 1080)
         self.top_bottom_splitter.setSizes([652, 400])
         self.bottom_splitter.setSizes([1139, 753])
 

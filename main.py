@@ -17,7 +17,6 @@ from mainDir.widgets.videoWidgets.matrixWidget import MatrixWidget
 def setPalette(_app):
     _app.setStyle("Fusion")
     darkPalette = QPalette()
-
     darkPalette.setColor(QPalette.ColorRole.Window, QColor(53, 53, 53))
     darkPalette.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.white)
     darkPalette.setColor(QPalette.ColorRole.Base, QColor(42, 42, 42))
@@ -31,7 +30,6 @@ def setPalette(_app):
     darkPalette.setColor(QPalette.ColorRole.Link, QColor(42, 130, 218))
     darkPalette.setColor(QPalette.ColorRole.Highlight, QColor(42, 130, 218))
     darkPalette.setColor(QPalette.ColorRole.HighlightedText, Qt.GlobalColor.white)
-
     darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText, QColor(127, 127, 127))
     darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text, QColor(127, 127, 127))
     darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, QColor(127, 127, 127))
