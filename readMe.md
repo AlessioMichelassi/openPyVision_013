@@ -16,7 +16,7 @@ Technical Details:
 
 - Development: The program is written in Python 3.10, utilizing PyQt5 for the graphical interface and OpenCV for video manipulation. The current version is being updated to PyQt6.
 - Open Source: OpenPyVision is open source with no commercial limitations. If you find something useful, please credit the author or the program.
-- Compatibility: Tested on Windows 10 and Windows 11. While theoretically portable to Linux, the screen capture component, based on Ra1nty Rain's DXCam (capable of 240Hz+ capturing!), would need to be rewritten for Linux.
+- Compatibility: Tested on Windows 10 and Windows 11. While theoretically portable to Linux, the screen capture component, based on Ra1nty Rain's DXCam (capable of 240Hz+ capturing! - "https://github.com/ra1nty/DXcam"), would need to be rewritten for Linux.
 
 ![OpenPyVision](https://github.com/AlessioMichelassi/openPyVision_013/blob/master/imgs/version012.png)
 
