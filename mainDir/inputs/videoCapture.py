@@ -102,7 +102,7 @@ class VideoCaptureSimple(BaseClass):
         self.cameraIndex = input_index
         # List of backends to try
         backends = [cv2.CAP_DSHOW, cv2.CAP_MSMF, cv2.CAP_VFW, cv2.CAP_ANY]
-        self.camera = cv2.VideoCapture(input_index, cv2.CAP_DSHOW)
+        self.camera = cv2.VideoCapture(input_index)
 
         if self.camera and self.camera.isOpened():
             self.camera.set(cv2.CAP_PROP_FPS, 60)
@@ -170,7 +170,7 @@ class VideoApp(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
         self.synchObject = SynchObject(50)
-        self.input1 = VideoCaptureSimple(self.synchObject, input_index=5, isUSB_Cam=True)
+        self.input1 = VideoCaptureSimple(self.synchObject, input_index=8, isUSB_Cam=True)
         self.widget = QWidget()
         self.mainLayout = QVBoxLayout()
         self.viewer = QLabel()

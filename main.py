@@ -9,7 +9,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 
-from mainDir.mainUI import VideoMixerUI
+from mainDir.mainUI_013 import VideoMixerUI
 from mainDir.ouputs.mainOut_Viewer import CV_MainOutViewer
 from mainDir.widgets.videoWidgets.matrixWidget import MatrixWidget
 

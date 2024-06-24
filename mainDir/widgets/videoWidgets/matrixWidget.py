@@ -114,5 +114,6 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     window = MatrixWidget()
+    window.matrix_Signal.connect(print)
     window.show()
     sys.exit(app.exec())

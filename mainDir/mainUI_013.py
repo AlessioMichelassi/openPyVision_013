@@ -1,5 +1,3 @@
-
-
 import numpy as np
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
@@ -156,6 +154,13 @@ class VideoMixerUI(QWidget):
                 self.mixBus.setPreviewInput(videoInput)
             else:
                 print(f"Input {inputInt} not found")
+        elif data["tally"] == "programChange":
+            inputInt = int(data["input"])
+            if self.matrix[inputInt] is not None:
+                videoInput = self.matrix[inputInt]
+                self.mixBus.setProgramInput(videoInput)
+            else:
+                print(f"Input {inputInt} not found")
         elif data["tally"] == "cut":
             self.mixBus.cut()
         elif data["tally"] == "auto":
@@ -182,55 +187,107 @@ class VideoMixerUI(QWidget):
             self.transitionType = MIX_TYPE.STILL
 
     def onMatrixSignal(self, data):
+        """
+        Handle the matrix signal by creating and setting the appropriate input based on the device type.
+
+        :param data: Dictionary containing the input data.
+        """
         print(f"Matrix signal: {data}")
         inputNumber = data["input"]
         inputName = data["inputName"]
         deviceType = data["deviceType"]
+
         if deviceType == "videoCapture":
-            deviceIndex = int(data["deviceIndex"])
-            self.createVideoCapture(inputNumber, inputName, deviceIndex)
+            self.handleVideoCapture(inputNumber, inputName, data)
         elif deviceType == "desktopCapture":
-            screenIndex = int(data["screenIndex"])
-            desktopCapture = ScreenCapture(self.synchObject, screen_index=screenIndex)
-            self.set_matrix_value(inputNumber, desktopCapture)
+            self.handleDesktopCapture(inputNumber, data)
         elif deviceType == "stillImage":
-            path = data["path"]
-            stillImage = ImageLoader(self.synchObject, path)
-            self.set_matrix_value(inputNumber, stillImage)
+            self.handleStillImage(inputNumber, data)
         elif deviceType == "videoPlayer":
-            pass
+            self.handleVideoPlayer(inputNumber, data)
         elif deviceType == "colorGenerator":
-            colorGenerator = ColorGenerator(self.synchObject)
-            color = self.returnQColorFromDictionary(data["color"])
-            colorGenerator.setColor(color)
-            self.set_matrix_value(inputNumber, colorGenerator)
+            self.handleColorGenerator(inputNumber, data)
         elif deviceType == "noiseGenerator":
-            noiseGenerator = RandomNoiseImageGenerator(self.synchObject)
-            self.set_matrix_value(inputNumber, noiseGenerator)
+            self.handleNoiseGenerator(inputNumber)
         elif deviceType == "gradientGenerator":
-            gradientType = data["gradientType"].lower()
-            color1 = self.returnQColorFromDictionary(data["color1"]['color'])
-            color2 = self.returnQColorFromDictionary(data["color2"]['color'])
-            gradientGenerator = GradientGenerator(self.synchObject, gradient_type=gradientType, start_color=color1,
-                                                  end_color=color2)
-            self.set_matrix_value(inputNumber, gradientGenerator)
+            self.handleGradientGenerator(inputNumber, data)
         elif deviceType == "smpteBarsGenerator":
-            if data['smpte'] == 0:
-                smpteBars = FullBarsGenerator(self.synchObject)
-            else:
-                smpteBars = SMPTEBarsGenerator(self.synchObject)
-            self.set_matrix_value(inputNumber, smpteBars)
+            self.handleSmpteBarsGenerator(inputNumber, data)
         elif deviceType == "checkerBoardGenerator":
-            checkerBoard = CheckerBoardGenerator(self.synchObject)
-            self.set_matrix_value(inputNumber, checkerBoard)
+            self.handleCheckerBoardGenerator(inputNumber)
         else:
-            print("NON VIDEO CAPTURE")
-        # se l'input è già presente in preview o program, aggiorna l'input
+            print("Unknown device type")
 
+        # Check if the input is in preview or program and update monitors
+        self.updatePreviewProgram(inputNumber)
 
-    def updateInput(self, inputNumber, inputName, data):
-        #to do
+    def handleVideoCapture(self, inputNumber, inputName, data):
+        deviceIndex = int(data["deviceIndex"])
+        self.createVideoCapture(inputNumber, inputName, deviceIndex)
+
+    def handleDesktopCapture(self, inputNumber, data):
+        screenIndex = int(data["screenIndex"])
+        desktopCapture = ScreenCapture(self.synchObject, screen_index=screenIndex)
+        self.set_matrix_value(inputNumber, desktopCapture)
+
+    def handleStillImage(self, inputNumber, data):
+        path = data["path"]
+        stillImage = ImageLoader(self.synchObject, path)
+        self.set_matrix_value(inputNumber, stillImage)
+
+    def handleVideoPlayer(self, inputNumber, data):
+        # Implementation for handling video player
         pass
+
+    def handleColorGenerator(self, inputNumber, data):
+        colorGenerator = ColorGenerator(self.synchObject)
+        color = self.returnQColorFromDictionary(data["color"])
+        colorGenerator.setColor(color)
+        self.set_matrix_value(inputNumber, colorGenerator)
+
+    def handleNoiseGenerator(self, inputNumber):
+        noiseGenerator = RandomNoiseImageGenerator(self.synchObject)
+        self.set_matrix_value(inputNumber, noiseGenerator)
+
+    def handleGradientGenerator(self, inputNumber, data):
+        gradientType = data["gradientType"].lower()
+        color1 = self.returnQColorFromDictionary(data["color1"]['color'])
+        color2 = self.returnQColorFromDictionary(data["color2"]['color'])
+        gradientGenerator = GradientGenerator(self.synchObject, gradient_type=gradientType, start_color=color1,
+                                              end_color=color2)
+        self.set_matrix_value(inputNumber, gradientGenerator)
+
+    def handleSmpteBarsGenerator(self, inputNumber, data):
+        if data['smpte'] == 0:
+            smpteBars = FullBarsGenerator(self.synchObject)
+        else:
+            smpteBars = SMPTEBarsGenerator(self.synchObject)
+        self.set_matrix_value(inputNumber, smpteBars)
+
+    def handleCheckerBoardGenerator(self, inputNumber):
+        checkerBoard = CheckerBoardGenerator(self.synchObject)
+        self.set_matrix_value(inputNumber, checkerBoard)
+
+    def updatePreviewProgram(self, inputNumber):
+        """
+        Check if the input is in preview or program and update the respective monitor.
+
+        :param inputNumber: The number of the input to check.
+        """
+        print(f"Update preview program: {inputNumber}")
+        if self.mixerPanel.btnDictionary["preview"] == inputNumber:
+            dictio = {"tally": "previewChange", "input": inputNumber}
+            self.mixerPanel.tally_SIGNAL.emit(dictio)
+        if self.mixerPanel.btnDictionary["program"] == inputNumber:
+            dictio = {"tally": "programChange", "input": inputNumber}
+            self.mixerPanel.tally_SIGNAL.emit(dictio)
+        print(f"debug: {self.mixerPanel.btnEnabled}")  # debug
+        if inputNumber not in self.mixerPanel.btnEnabled:
+            print(f"debug: {inputNumber} enabled")
+            self.mixerPanel.btnEnabled.append(inputNumber)
+        else:
+            print(f"debug: {inputNumber} already enabled")  # debug
+            print(f"debug: {self.mixerPanel.btnEnabled}")  # debug
 
     @staticmethod
     def returnQColorFromDictionary(data):
@@ -243,7 +300,16 @@ class VideoMixerUI(QWidget):
     def createVideoCapture(self, inputNumber, inputName, deviceIndex):
         videoCapture = VideoCaptureSimple(self.synchObject, input_index=deviceIndex)
         self.set_matrix_value(inputNumber, videoCapture)
+        print(f"debug: {inputNumber} {inputName} {deviceIndex} {self.matrix}")
 
     def updateInput(self, inputNumber, inputName, data):
         self.set_matrix_value(inputNumber, data)
 
+
+if __name__ == "__main__":
+    import sys
+
+    app = QApplication(sys.argv)
+    window = VideoMixerUI()
+    window.show()
+    sys.exit(app.exec())

@@ -13,7 +13,7 @@ class VideoApp(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
         self.synchObject = SynchObject(60)
-        self.input1 = VideoCaptureSimple(self.synchObject, input_index=5)
+        self.input1 = VideoCaptureSimple(self.synchObject, input_index=6)
         self.widget = QWidget()
         self.mainLayout = QVBoxLayout()
         self.viewer = QLabel()

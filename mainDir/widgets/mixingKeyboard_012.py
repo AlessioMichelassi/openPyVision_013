@@ -224,6 +224,7 @@ class MixerPanelWidget_012(QWidget):
         """
         button = self.sender()
         number = int(button.objectName().split("_")[1])
+        lastProgram = self.btnDictionary["program"]
         if self.btnShift.isChecked():
             number += 8
         if number in self.btnEnabled:
@@ -241,6 +242,22 @@ class MixerPanelWidget_012(QWidget):
             self.btnDictionary["program"] = number
         else:
             button.setChecked(False)
+        self.setPreview(lastProgram)
+
+    def setPreview(self, lastProgram):
+        """
+        Quando viene premuto un pulsante di program mette in preview l'ultimo program selezionato
+        :param lastProgram:
+        :return:
+        """
+        dictio = {"tally": "previewChange", "input": lastProgram}
+        self.tally_SIGNAL.emit(dictio)
+        for btn in self.btnsPreview:
+            if btn.objectName() == f"prw_{lastProgram}":
+                btn.setChecked(True)
+            else:
+                btn.setChecked(False)
+        self.btnDictionary["preview"] = lastProgram
 
     def onTransitionButtonClicked(self):
         """
