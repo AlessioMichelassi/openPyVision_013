@@ -1,7 +1,7 @@
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 
-from mainDir.widgets.generics.deviceUpdaterThread import DeviceUpdater
+from mainDir.inputs.deviceProperties.deviceUpdaterThread import DeviceUpdater
 
 """
 Combo device è una comboBox che usa il thread DeviceUpdater per popolare la lista dei dispositivi.

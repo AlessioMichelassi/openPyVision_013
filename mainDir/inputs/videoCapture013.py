@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import *
 
 from mainDir.inputs.baseClass import BaseClass
 from mainDir.inputs.synchObject import SynchObject
-from mainDir.widgets.generics.deviceUpdaterThread import DeviceUpdater
+from mainDir.inputs.deviceProperties.deviceUpdaterThread import DeviceUpdater
 
 """
 La classe VideoCapture è una sottoclasse di BaseClass e rappresenta un'entità che cattura i frame da una sorgente video
