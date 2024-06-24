@@ -196,7 +196,8 @@ class VideoMixerUI(QWidget):
         inputNumber = data["input"]
         inputName = data["inputName"]
         deviceType = data["deviceType"]
-
+        if deviceType is None:
+            self.unplugFromMatrix(inputNumber)
         if deviceType == "videoCapture":
             self.handleVideoCapture(inputNumber, inputName, data)
         elif deviceType == "desktopCapture":
@@ -222,15 +223,34 @@ class VideoMixerUI(QWidget):
         self.updatePreviewProgram(inputNumber)
 
     def handleVideoCapture(self, inputNumber, inputName, data):
+        """
+        Questa funzione crea un video capture e lo imposta nella matrice.
+        :param inputNumber: l'indice dell'input
+        :param inputName: il nome dell'input
+        :param data:  i dati dell'input
+        :return:
+        """
         deviceIndex = int(data["deviceIndex"])
         self.createVideoCapture(inputNumber, inputName, deviceIndex)
 
     def handleDesktopCapture(self, inputNumber, data):
+        """
+        Questa funzione crea un desktop capture e lo imposta nella matrice.
+        :param inputNumber:
+        :param data:
+        :return:
+        """
         screenIndex = int(data["screenIndex"])
         desktopCapture = ScreenCapture(self.synchObject, screen_index=screenIndex)
         self.set_matrix_value(inputNumber, desktopCapture)
 
     def handleStillImage(self, inputNumber, data):
+        """
+        Questa funzione crea un'immagine fissa e la imposta nella matrice.
+        :param inputNumber:
+        :param data:
+        :return:
+        """
         path = data["path"]
         stillImage = ImageLoader(self.synchObject, path)
         self.set_matrix_value(inputNumber, stillImage)
@@ -240,16 +260,33 @@ class VideoMixerUI(QWidget):
         pass
 
     def handleColorGenerator(self, inputNumber, data):
+        """
+        Questa funzione crea un generatore di colori e lo imposta nella matrice.
+        :param inputNumber:
+        :param data:
+        :return:
+        """
         colorGenerator = ColorGenerator(self.synchObject)
         color = self.returnQColorFromDictionary(data["color"])
         colorGenerator.setColor(color)
         self.set_matrix_value(inputNumber, colorGenerator)
 
     def handleNoiseGenerator(self, inputNumber):
+        """
+        Questa funzione crea un generatore di rumore e lo imposta nella matrice.
+        :param inputNumber:
+        :return:
+        """
         noiseGenerator = RandomNoiseImageGenerator(self.synchObject)
         self.set_matrix_value(inputNumber, noiseGenerator)
 
     def handleGradientGenerator(self, inputNumber, data):
+        """
+        Questa funzione crea un generatore di gradienti e lo imposta nella matrice.
+        :param inputNumber:
+        :param data:
+        :return:
+        """
         gradientType = data["gradientType"].lower()
         color1 = self.returnQColorFromDictionary(data["color1"]['color'])
         color2 = self.returnQColorFromDictionary(data["color2"]['color'])
@@ -258,6 +295,12 @@ class VideoMixerUI(QWidget):
         self.set_matrix_value(inputNumber, gradientGenerator)
 
     def handleSmpteBarsGenerator(self, inputNumber, data):
+        """
+        Questa funzione crea un generatore di barre SMPTE o FullBars
+        :param inputNumber:
+        :param data:
+        :return:
+        """
         if data['smpte'] == 0:
             smpteBars = FullBarsGenerator(self.synchObject)
         else:
@@ -265,29 +308,45 @@ class VideoMixerUI(QWidget):
         self.set_matrix_value(inputNumber, smpteBars)
 
     def handleCheckerBoardGenerator(self, inputNumber):
+        """
+        Questa funzione crea un checkerboard generator e lo imposta nella matrice.
+        :param inputNumber:
+        :return:
+        """
         checkerBoard = CheckerBoardGenerator(self.synchObject)
         self.set_matrix_value(inputNumber, checkerBoard)
 
     def updatePreviewProgram(self, inputNumber):
         """
-        Check if the input is in preview or program and update the respective monitor.
-
+        Questa funzione aggiorna cos'è in program e cosa è in preview
+        nel caso in cui arrivi un segnale di cambio di input dalla matrice.
+        Controlla anche che l'input sia abilitato nel tastierino del mixer,
+        perchè per prevenire schermate nere di default sono disabilitati.
         :param inputNumber: The number of the input to check.
         """
-        print(f"Update preview program: {inputNumber}")
         if self.mixerPanel.btnDictionary["preview"] == inputNumber:
             dictio = {"tally": "previewChange", "input": inputNumber}
             self.mixerPanel.tally_SIGNAL.emit(dictio)
         if self.mixerPanel.btnDictionary["program"] == inputNumber:
             dictio = {"tally": "programChange", "input": inputNumber}
             self.mixerPanel.tally_SIGNAL.emit(dictio)
-        print(f"debug: {self.mixerPanel.btnEnabled}")  # debug
-        if inputNumber not in self.mixerPanel.btnEnabled:
-            print(f"debug: {inputNumber} enabled")
-            self.mixerPanel.btnEnabled.append(inputNumber)
-        else:
-            print(f"debug: {inputNumber} already enabled")  # debug
-            print(f"debug: {self.mixerPanel.btnEnabled}")  # debug
+        if inputNumber not in self.mixerPanel._btnEnabled:
+            self.mixerPanel.enableButton(inputNumber)
+
+    def unplugFromMatrix(self, inputNumber):
+        """
+        Questa funzione rimuove l'input dalla matrice.
+        :param inputNumber:
+        :return:
+        """
+        blackImage = ColorGenerator(self.synchObject)
+        blackImage.setColor(QColor(0, 0, 0))
+        self.set_matrix_value(inputNumber, blackImage)
+        self.updatePreviewProgram(inputNumber)
+        self.matrix[inputNumber] = None
+        self.mixerPanel.disableButton(inputNumber)
+        print(f"debug {inputNumber} {self.matrix}")
+        print(f"debug {self.mixerPanel._btnEnabled}")
 
     @staticmethod
     def returnQColorFromDictionary(data):

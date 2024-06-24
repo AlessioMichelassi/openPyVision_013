@@ -102,10 +102,10 @@ class VideoCaptureSimple(BaseClass):
         self.cameraIndex = input_index
         # List of backends to try
         backends = [cv2.CAP_DSHOW, cv2.CAP_MSMF, cv2.CAP_VFW, cv2.CAP_ANY]
-        self.camera = cv2.VideoCapture(input_index)
+        self.camera = cv2.VideoCapture(input_index, cv2.CAP_DSHOW)
 
         if self.camera and self.camera.isOpened():
-            self.camera.set(cv2.CAP_PROP_FPS, 60)
+            #self.camera.set(cv2.CAP_PROP_FPS, 60)
             self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, resolution.height())
             self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, resolution.width())
 
@@ -121,8 +121,11 @@ class VideoCaptureSimple(BaseClass):
             print(f"Capture device FPS: {fps}")
             print(f"Capture device Frame Width: {frame_width}")
             print(f"Capture device Frame Height: {frame_height}")
+        else:
+            print(f"Failed to open videoCapture {input_index}")
+            self.camera = None
 
-        self._frame = np.zeros((resolution.height(), resolution.width(), 3), dtype=np.uint8)
+            self._frame = np.zeros((resolution.height(), resolution.width(), 3), dtype=np.uint8)
 
     def __del__(self):
         self.stop()
@@ -170,7 +173,7 @@ class VideoApp(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
         self.synchObject = SynchObject(50)
-        self.input1 = VideoCaptureSimple(self.synchObject, input_index=8, isUSB_Cam=True)
+        self.input1 = VideoCaptureSimple(self.synchObject, input_index=7, isUSB_Cam=True)
         self.widget = QWidget()
         self.mainLayout = QVBoxLayout()
         self.viewer = QLabel()

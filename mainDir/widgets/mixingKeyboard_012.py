@@ -21,7 +21,7 @@ class MixerPanelWidget_012(QWidget):
     labelNames = ["input1", "input2", "input3", "input4", "input5", "input6", "input7", "input8", "input9", "input10",
                   "input11", "input12", "input13", "input14", "input15", "input16"]
     downStreamKeyNames = ["key1", "key2", "key3"]
-    btnEnabled = [1, 2, 9]
+    _btnEnabled = [1, 2, 9]
     btnDictionary = {"preview": 1, "program": 2,
                      "transition": 0, "key": False, "key2": False, "key3": False,
                      "lbl_1": "input1", "lbl_2": "input2", "lbl_3": "input3", "lbl_4": "input4",
@@ -200,7 +200,7 @@ class MixerPanelWidget_012(QWidget):
         number = int(button.objectName().split("_")[1])
         if self.btnShift.isChecked():
             number += 8
-        if number in self.btnEnabled:
+        if number in self._btnEnabled:
             dictio = {"tally": "previewChange", "input": number}
             self.tally_SIGNAL.emit(dictio)
             for btn in self.btnsPreview:
@@ -227,7 +227,7 @@ class MixerPanelWidget_012(QWidget):
         lastProgram = self.btnDictionary["program"]
         if self.btnShift.isChecked():
             number += 8
-        if number in self.btnEnabled:
+        if number in self._btnEnabled:
             if button.isChecked():
                 pass
             else:
@@ -399,6 +399,37 @@ class MixerPanelWidget_012(QWidget):
             self.btnAuto.setStyleSheet(btnCutStyle)
             self.swapPreviewProgram()
             self.isFadeInverted = not self.isFadeInverted
+
+    def enableButton(self, buttonNumber):
+        if buttonNumber not in self._btnEnabled:
+            self._btnEnabled.append(buttonNumber)
+            self.restoreButtonState()
+
+    def disableButton(self, buttonNumber):
+        """
+        Disabilita il pulsante con il numero passato come parametro
+        Nel caso in cui il pulsante sia già disabilitato non fa nulla, se il pulsante corrente
+        è il pulsante in preview o in program lo swap cerca un altro pulsante attivo e lo mette in preview
+        se il pulsante selezionato è in preview, se è in program lo swap non viene effettuato e in program va
+        il pulsante in preview.
+        :param buttonNumber: il numero del pulsante da 1 a 16
+        :return:
+        """
+        if buttonNumber in self._btnEnabled:
+            actualPreview = self.btnDictionary["preview"]
+            actualProgram = self.btnDictionary["program"]
+            if actualPreview == buttonNumber:
+                # prende un pulsante attivo
+                for i in self._btnEnabled:
+                    if i != buttonNumber:
+                        self.btnDictionary["preview"] = i
+                        break
+                self._btnEnabled.remove(buttonNumber)
+                self.restoreButtonState()
+            elif actualProgram == buttonNumber:
+                self.btnDictionary["program"] = actualPreview
+            self._btnEnabled.remove(buttonNumber)
+            self.restoreButtonState()
 
 
 if __name__ == '__main__':

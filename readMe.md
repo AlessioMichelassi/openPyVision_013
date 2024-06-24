@@ -23,3 +23,52 @@ Technical Details:
 Experience the power and flexibility of OpenPyVision for your real-time video mixing needs.
 
 audio coming next
+
+# Installation
+1. Download the latest release from the [Releases](
+2. Extract the contents of the zip file to a folder.
+3. Run the executable file.
+4. Enjoy!
+
+openPyVision use FFmpeg in some cases, so you need to have it installed on your system. You can download it from the official website.
+
+
+# Installation
+
+1. **Download FFMPEG**:
+   - Visit [FFmpeg official download page](https://ffmpeg.org/download.html).
+   - Download the appropriate version for your operating system.
+
+2. **Unzip**:
+   - Unzip the downloaded file to a desired folder.
+
+3. **Add to System Environment Variables**:
+   - Add the path to the `ffmpeg/bin` directory to your system environment variables:
+     - Open Command Prompt as Administrator.
+     - Run the following command:
+       ```sh
+       setx path "%path%;C:\path\to\ffmpeg\bin" /M
+       ```
+     - Replace `C:\path\to\ffmpeg\bin` with the actual path where you unzipped FFmpeg.
+
+4. **Verify Installation**:
+   - Open a new Command Prompt window.
+   - Type the following command to check if FFmpeg is installed correctly:
+     ```sh
+     ffmpeg -version
+     ```
+   - You should see the version information of FFmpeg.
+
+```sh
+ffmpeg -version
+```
+
+### Example Output
+```
+ffmpeg version 4.4.1 Copyright (c) 2000-2021 the FFmpeg developers
+built with gcc 10.3.0 (GCC)
+configuration: --enable-gpl --enable-version3 .... etc
+```
+
+### Note
+If you encounter any issues, please refer to the [FFmpeg documentation](https://ffmpeg.org/documentation.html) for further assistance.
