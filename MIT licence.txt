@@ -1,0 +1,39 @@
+MIT License
+
+Copyright (c) 2023-2024 Alessio Michelassi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Con la presente si concede, gratuitamente, a chiunque ottenga una copia
+di questo software e dei relativi file di documentazione (il "Software"), il permesso di utilizzare
+il Software senza restrizioni, inclusi, senza limitazioni, i diritti
+di usare, copiare, modificare, unire, pubblicare, distribuire, concedere in licenza, e/o vendere
+copie del Software, e di permettere alle persone a cui il Software è
+fornito di fare lo stesso, alle seguenti condizioni:
+
+Il sopra citato avviso di copyright e questo permesso devono essere inclusi in tutte
+le copie o parti sostanziali del Software.
+
+IL SOFTWARE È FORNITO "COSÌ COM'È", SENZA GARANZIA DI ALCUN TIPO, ESPRESSA O
+IMPLICITA, COMPRESE, MA NON SOLO, LE GARANZIE DI COMMERCIABILITÀ,
+IDONEITÀ PER UN PARTICOLARE SCOPO E NON VIOLAZIONE DEI DIRITTI. IN NESSUN CASO GLI
+AUTORI O I TITOLARI DEL COPYRIGHT SARANNO RESPONSABILI PER QUALSIASI RECLAMO, DANNO O ALTRA
+RESPONSABILITÀ, SIA IN UN'AZIONE CONTRATTUALE, ILLECITA O ALTRO, DERIVANTE DA,
+FUORI O IN CONNESSIONE CON IL SOFTWARE O L'USO O ALTRE OPERAZIONI NEL
+SOFTWARE.
