@@ -12,7 +12,7 @@ from mainDir.inputs.generator_bars_SMPTE import SMPTEBarsGenerator
 from mainDir.inputs.imageLoader_Still import ImageLoader
 from mainDir.inputs.screenCapture import ScreenCapture
 from mainDir.inputs.synchObject import SynchObject
-from mainDir.inputs.videoCapture import VideoCaptureSimple
+from mainDir.inputs.videoCapture013 import VideoCapture013
 from mainDir.mixBus.mixBus_014 import MixBus014, MIX_TYPE
 from mainDir.ouputs.monitorWidget import MonitorWidget012
 from mainDir.widgets.mixingKeyboard_012 import MixerPanelWidget_012
@@ -357,7 +357,7 @@ class VideoMixerUI(QWidget):
         return color
 
     def createVideoCapture(self, inputNumber, inputName, deviceIndex):
-        videoCapture = VideoCaptureSimple(self.synchObject, input_index=deviceIndex)
+        videoCapture = VideoCapture013(self.synchObject, deviceIndex)
         self.set_matrix_value(inputNumber, videoCapture)
         print(f"debug: {inputNumber} {inputName} {deviceIndex} {self.matrix}")
 

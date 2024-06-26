@@ -29,7 +29,7 @@ di Dshow e saltare la ricerca dei dispositivi.
 """
 
 
-class VideoCapture(BaseClass):
+class VideoCapture013(BaseClass):
     needResizing = False
 
     def __init__(self, synchObject, cameraIndex=0, deviceDictionary=None, forceDShow=False,
@@ -110,7 +110,7 @@ class VideoApp(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
         self.synchObject = SynchObject(60)
-        self.input1 = VideoCapture(self.synchObject, 5, resolution=QSize(1920, 1080))
+        self.input1 = VideoCapture013(self.synchObject, 7, resolution=QSize(1920, 1080))
         self.widget = QWidget()
         self.mainLayout = QVBoxLayout()
         self.viewer = QLabel()
@@ -125,7 +125,7 @@ class VideoApp(QApplication):
         self.uiTimer = QTimer(self)
         self.uiTimer.timeout.connect(self.display_frame)
         self.uiTimer.start(1000 // 60)  # Update UI at 60 FPS
-        #QTimer.singleShot(10000, self.stop_app)
+        QTimer.singleShot(10000, self.stop_app)
 
     def display_frame(self):
         frame = self.input1.getFrame()
