@@ -14,7 +14,7 @@ from mainDir.inputs.generator_bars_SMPTE import SMPTEBarsGenerator
 from mainDir.inputs.imageLoader_Still import ImageLoader
 from mainDir.inputs.screenCapture import ScreenCapture
 from mainDir.inputs.synchObject import SynchObject
-from mainDir.inputs.videoCapture import VideoCaptureSimple
+from mainDir.inputs.oldCode.videoCapture import VideoCaptureSimple
 from mainDir.mixBus.mixBus_014 import MixBus014, MIX_TYPE
 from mainDir.ouputs.monitorWidget import MonitorWidget012
 from mainDir.widgets.mixingKeyboard_012 import MixerPanelWidget_012

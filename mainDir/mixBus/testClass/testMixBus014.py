@@ -6,10 +6,9 @@ from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 
 from mainDir.inputs.generator_Color import ColorGenerator
-from mainDir.inputs.generator_Noise_Random import RandomNoiseImageGenerator
 from mainDir.inputs.screenCapture import ScreenCapture
 from mainDir.inputs.synchObject import SynchObject
-from mainDir.inputs.videoCapture import VideoCaptureSimple
+from mainDir.inputs.videoCapture013 import VideoCapture013
 from mainDir.mixBus.mixBus_014 import MixBus014, MIX_TYPE
 
 
@@ -123,13 +122,13 @@ class mixBusWidget(QWidget):
             print(type(self.mixBus.getMix()))
 
 
+
 class VideoApp(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
         self.synchObject = SynchObject(60)
         self.input1 = ScreenCapture(self.synchObject, screen_index=1)
-        self.input2 = ColorGenerator(self.synchObject)
-        self.input2.setColor(color=QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
+        self.input2 = VideoCapture013(self.synchObject, 7)
 
         self.widget = mixBusWidget(self.synchObject, self.input1, self.input2)
         self.widget.show()

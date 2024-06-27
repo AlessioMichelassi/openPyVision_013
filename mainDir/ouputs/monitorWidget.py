@@ -6,6 +6,7 @@ from PyQt6.QtGui import *
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import *
 
+from mainDir.inputs.videoCapture013 import VideoCapture013
 from mainDir.ouputs.mainOut_Viewer import CV_MainOutViewer
 from mainDir.widgets.generics.btnStyle import btnMonitorStyle
 from mainDir.widgets.graphicEngine.graphicSceneOverride012 import GraphicSceneOverride012
@@ -403,7 +404,7 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     synchObject = SynchObject()
-    input1 = FullBarsGenerator(synchObject)
+    input1 = VideoCapture013(synchObject, 7)
     monitor = MonitorWidget012(synchObject, isPrg=False)
     monitor.setFixedSize(1280, 720)
     mainOut = CV_MainOutViewer(input1.getFrame())

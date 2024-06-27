@@ -1,21 +1,19 @@
 import sys
 import time
 
+from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
-from PyQt6.QtWidgets import *
-
 
 from mainDir.inputs.synchObject import SynchObject
-from mainDir.inputs.deviceProperties.deviceUpdaterThread import DeviceUpdater
-from mainDir.inputs.videoCapture013 import VideoCapture013
+from mainDir.inputs.oldCode.videoCapture import VideoCaptureSimple
 
 
 class VideoApp(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
         self.synchObject = SynchObject(60)
-        self.input1 = VideoCapture013(self.synchObject, 7, resolution=QSize(1920, 1080))
+        self.input1 = VideoCaptureSimple(self.synchObject, input_index=8)
         self.widget = QWidget()
         self.mainLayout = QVBoxLayout()
         self.viewer = QLabel()
@@ -57,17 +55,6 @@ if __name__ == '__main__':
     import cProfile
     import pstats
     import io
-
-    deviceDictionary = None
-
-
-    def update_devices(devices):
-        global deviceDictionary
-        deviceDictionary = devices
-
-
-    deviceUpdater = DeviceUpdater()
-    deviceUpdater.finished.connect(update_devices)
 
     pr = cProfile.Profile()
     pr.enable()

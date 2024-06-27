@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import *
 from mainDir.inputs.deviceProperties.deviceCapabilities import FFmpegCapabilitiesThread
 from mainDir.inputs.deviceProperties.deviceUpdaterThread import DeviceUpdater
 
+
 class AppDemo(QWidget):
     def __init__(self):
         super().__init__()
@@ -36,6 +37,7 @@ class AppDemo(QWidget):
 
     def process_next_device(self):
         if not self.devices_queue:
+            self.progress_bar.setValue(self.progress_bar.maximum())
             return
         device_name = self.devices_queue.pop(0)
         self.text_edit.append(f"Found video device: {device_name}")
