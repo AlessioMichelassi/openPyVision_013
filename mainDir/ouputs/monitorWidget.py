@@ -10,7 +10,7 @@ from mainDir.inputs.videoCapture013 import VideoCapture013
 from mainDir.ouputs.mainOut_Viewer import CV_MainOutViewer
 from mainDir.widgets.generics.btnStyle import btnMonitorStyle
 from mainDir.widgets.graphicEngine.graphicSceneOverride012 import GraphicSceneOverride012
-from mainDir.widgets.graphicEngine.graphicViewOverride import GraphicViewOverride
+from mainDir.widgets.graphicEngine.graphicViewOverride013 import GraphicViewOverride013
 from mainDir.widgets.videoWidgets.rgbParade import RGBParade
 
 
@@ -40,7 +40,7 @@ class MonitorWidget012(QWidget):
 
         # Creazione della scena grafica e della vista grafica
         self.scene = GraphicSceneOverride012()
-        self.view = GraphicViewOverride(self.scene)
+        self.view = GraphicViewOverride013(self.scene)
 
         # Il clean feed preso dal mixBus viene inserito in questo oggetto
         self.graphicObject = QGraphicsPixmapItem()

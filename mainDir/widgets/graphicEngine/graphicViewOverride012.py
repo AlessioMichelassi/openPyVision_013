@@ -10,10 +10,15 @@ class GraphicViewOverride(QGraphicsView):
     _isPanning = False
     _lastMiddleMousePosition = QPoint()
     currentScaleChange = pyqtSignal(float, name="currentScale")
+    shiftPressed = False
+    ctrlPressed = False
+    lastPos: QPointF() = None
+    deltaPos = QPointF()
 
     def __init__(self, _scene, parent=None):
         super().__init__(_scene, parent)
         self.initRenderHints()
+        self.isEditorModality = False
 
     def initRenderHints(self):
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
@@ -25,20 +30,49 @@ class GraphicViewOverride(QGraphicsView):
         else:
             self.setViewport(QWidget(self))
 
+    def setEditorModality(self, _bool):
+        self.isEditorModality = _bool
+        self.shiftPressed = False
+        self.ctrlPressed = False
+        if _bool:
+            self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        else:
+            self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
     def mousePressEvent(self, event, _QMouseEvent=None):
         super().mousePressEvent(event)
         if event.button() == Qt.MouseButton.MiddleButton:
             self.mouseMiddlePressEvent(event)
+        elif event.button() == Qt.MouseButton.LeftButton and self.isEditorModality:
+            self.currentItem = self.itemAt(event.pos())
+            if self.currentItem:
+                self.lastPos = self.mapToScene(event.pos())
+                self.deltaPos = self.currentItem.pos() - self.lastPos
 
     def mouseMoveEvent(self, event, _QMouseEvent=None):
         super().mouseMoveEvent(event)
         if self._isPanning:
             self.panTheScene(event)
+        if self.isEditorModality and self.currentItem and self.lastPos is not None:
+            # evita il pan della scena
+              
+            currentPos = self.mapToScene(event.pos()) + self.deltaPos
+            if self.shiftPressed:
+                newPos = QPointF(self.currentItem.pos().x(), currentPos.y())
+            elif self.ctrlPressed:
+                newPos = QPointF(currentPos.x(), self.currentItem.pos().y())
+            else:
+                newPos = currentPos
+            self.currentItem.setPos(newPos)
 
     def mouseReleaseEvent(self, event, _QMouseEvent=None):
         super().mouseReleaseEvent(event)
         if event.button() == Qt.MouseButton.MiddleButton:
             self.mouseMiddleReleaseEvent(event)
+        if event.button() == Qt.MouseButton.LeftButton:
+            if self.isEditorModality:
+                self.lastPos = None
+                self.currentItem = None
 
     # -------------------------- mouse events --------------------------
 
@@ -87,6 +121,25 @@ class GraphicViewOverride(QGraphicsView):
         self.scale(factor, factor)
         self.centerOn(rect.center())
         self.currentScaleChange.emit(self.transform().m11())
+
+    def keyPressEvent(self, event):
+        if self.isEditorModality:
+            if event.key() == Qt.Key.Key_Shift:
+                self.shiftPressed = True
+                print("Shift pressed")
+            elif event.key() == Qt.Key.Key_Control:
+                self.ctrlPressed = True
+                print("Ctrl pressed")
+        super().keyPressEvent(event)
+
+    def keyReleaseEvent(self, event):
+        if self.isEditorModality:
+            if event.key() == Qt.Key.Key_Shift:
+                print("Shift released")
+                self.shiftPressed = False
+            elif event.key() == Qt.Key.Key_Control:
+                self.ctrlPressed = False
+        super().keyReleaseEvent(event)
 
 
 if __name__ == "__main__":
