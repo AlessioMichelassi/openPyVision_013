@@ -2,15 +2,12 @@ import json
 import cv2
 import subprocess
 from PyQt6.QtWidgets import *
-from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 import tempfile
 import os
-import numpy as np
-import soundfile as sf
 
-from mainDir.widgets.playlistWidgets.playlistItems.audioThreadCalculator import VolumeCalculator
-from mainDir.widgets.playlistWidgets.playlistItems.baseItem import BaseItem
+from mainDir.widgets.playlistWidgets.playlistItems.playListData.audioThreadCalculator import VolumeCalculator
+from mainDir.widgets.playlistWidgets.playlistItems.playlistGraphicsEngine.baseItem import BaseItem
 
 
 class ItemVideo(BaseItem):
@@ -24,6 +21,9 @@ class ItemVideo(BaseItem):
     def __init__(self, filePath=None, parent=None):
         super().__init__(parent)
         self.initConnections()
+        self.name = ""
+        self.path = ""
+        self.temp_folder = ""
         if filePath:
             self.loadVideoFile(filePath)
 
@@ -32,10 +32,6 @@ class ItemVideo(BaseItem):
         self.btnLoad.clicked.connect(self.loadItem)
 
     def loadItem(self):
-        """
-        Open a file dialog to select a video file
-        :return:
-        """
         container_filters = []
         for container in self.codec.keys():
             container_filters.append(f"*.{container}")
@@ -52,23 +48,29 @@ class ItemVideo(BaseItem):
             self.loadVideoFile(filePath)
 
     def loadVideoFile(self, filePath):
-        """
-        Load the video file and update the UI
-        :param filePath: Path to the video file
-        """
-        self.name = filePath.split('/')[-1]
+        self.name = os.path.basename(filePath)
         self.path = filePath
-        self.setThumbnail(self.getVideoThumbnail(filePath))
-        self.setFileName(self.name)
-        self.setStartAt("00:00")
-        self.update()
-        self.getVideoInfo(filePath)
+        self.temp_folder = os.path.join(tempfile.gettempdir(), self.name)
+        saved_info_path = os.path.join(self.temp_folder, "video_info.json")
+
+        if os.path.exists(saved_info_path):
+            self.loadSavedVideoInfo(saved_info_path)
+        else:
+            self.setThumbnail(self.getVideoThumbnail(filePath))
+            self.setFileName(self.name)
+            self.setStartAt("00:00")
+            self.update()
+            self.getVideoInfo(filePath)
+            self.createTempFolder()
+
+    def createTempFolder(self):
+        if not os.path.exists(self.temp_folder):
+            os.makedirs(self.temp_folder)
+        print(f"Temporary folder created: {self.temp_folder}")
+        self.getVideoThumbnail(self.path).save(os.path.join(self.temp_folder, "thumbnail.png"))
+        self.saveVideoInfo()
 
     def getVideoInfo(self, path):
-        """
-        Main function to get video information, update labels, and check for black frames.
-        :param path: Path to the video file
-        """
         video_info_dict = self.extractVideoInfo(path)
         self.updateVideoLabels(video_info_dict)
 
@@ -78,12 +80,23 @@ class ItemVideo(BaseItem):
         self.checkBlackFrames(path, video_info_dict.get('fps', 30), audio_info_dict.get('duration_seconds', 0),
                               audio_info_dict.get('duration_minutes', 0))
 
+    def saveVideoInfo(self):
+        video_info = {
+            'video_info': self.extractVideoInfo(self.path),
+            'audio_info': self.extractAudioInfo(self.path)
+        }
+        with open(os.path.join(self.temp_folder, "video_info.json"), 'w') as f:
+            json.dump(video_info, f)
+
+    def loadSavedVideoInfo(self, saved_info_path):
+        with open(saved_info_path, 'r') as f:
+            video_info = json.load(f)
+
+        self.updateVideoLabels(video_info['video_info'])
+        self.updateAudioLabels(video_info['audio_info'])
+        self.setThumbnail(QPixmap(os.path.join(self.temp_folder, "thumbnail.png")))
+
     def extractVideoInfo(self, path):
-        """
-        Extracts video information using ffprobe.
-        :param path: Path to the video file
-        :return: Dictionary with video information
-        """
         video_info_cmd = [
             'ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries',
             'stream=width,height,codec_name,avg_frame_rate,duration', '-of', 'default=noprint_wrappers=1', path
@@ -99,11 +112,6 @@ class ItemVideo(BaseItem):
         return {}
 
     def extractAudioInfo(self, path):
-        """
-        Extracts audio information using ffprobe.
-        :param path: Path to the video file
-        :return: Dictionary with audio information
-        """
         audio_info_cmd = [
             'ffprobe', '-v', 'error', '-select_streams', 'a:0', '-show_entries',
             'stream=codec_name,sample_rate,channels,duration', '-of', 'default=noprint_wrappers=1', path
@@ -122,10 +130,6 @@ class ItemVideo(BaseItem):
         return {}
 
     def updateVideoLabels(self, video_info_dict):
-        """
-        Updates the UI labels with video information.
-        :param video_info_dict: Dictionary with video information
-        """
         video_codec = video_info_dict.get('codec_name', 'Unknown')
         width = video_info_dict.get('width', '0000')
         height = video_info_dict.get('height', '0000')
@@ -136,10 +140,6 @@ class ItemVideo(BaseItem):
         self.setEndAt(f"{duration_minutes:02}:{duration_seconds:02}")
 
     def updateAudioLabels(self, audio_info_dict):
-        """
-        Updates the UI labels with audio information.
-        :param audio_info_dict: Dictionary with audio information
-        """
         audio_codec = audio_info_dict.get('codec_name', 'Unknown')
         sample_rate = audio_info_dict.get('sample_rate', '0000')
         channels = int(audio_info_dict.get('channels', '0'))
@@ -148,13 +148,6 @@ class ItemVideo(BaseItem):
         self.setAudioCodec(f"{audio_codec}: {sample_rate}Hz {channels}ch duration {minutes:02}:{seconds:02}")
 
     def checkBlackFrames(self, path, fps, duration_seconds, duration_minutes):
-        """
-        Checks for black frames at the start and end of the video.
-        :param path: Path to the video file
-        :param fps: Frames per second of the video
-        :param duration_seconds: Total seconds duration of the video
-        :param duration_minutes: Total minutes duration of the video
-        """
         start_black_frame = self.check_black_frame(path, start=True)
         end_black_frame = self.check_black_frame(path, start=False, fps=fps, duration_seconds=duration_seconds,
                                                  duration_minutes=duration_minutes)
@@ -166,7 +159,8 @@ class ItemVideo(BaseItem):
             self.setBlackFrameOnEnd("- no black frame at end")
 
     def updateVolumeInfo(self, avg_volumes):
-        avg_volume_str = ', '.join([f"Ch{idx + 1}: {vol:.2f}dB" for idx, vol in enumerate(avg_volumes) if vol is not None])
+        avg_volume_str = ', '.join(
+            [f"Ch{idx + 1}: {vol:.2f}dB" for idx, vol in enumerate(avg_volumes) if vol is not None])
         self.setVolume(f"Avg Vol: {avg_volume_str}")
 
     def check_black_frame(self, path, start=True, fps=30, duration_seconds=0, duration_minutes=0):

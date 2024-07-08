@@ -20,6 +20,11 @@ from mainDir.widgets.videoWidgets.matrixWidget import MatrixWidget
 
 
 class VideoMixerUI(QWidget):
+    """
+    The VideoMixerUI class provides a user interface for managing video inputs,
+    transitions, and effects. It includes monitors for preview and program outputs,
+    a mixer panel, and a matrix for selecting input sources.
+    """
 
     transitionDictionary = {
         "mix": "Mix",
@@ -31,10 +36,13 @@ class VideoMixerUI(QWidget):
     transitionType = None
 
     def __init__(self):
+        """
+        Initialize the VideoMixerUI.
+        """
         super().__init__()
         self.setWindowTitle('openPyVision Mixer 0.1.3')
 
-        # Inizializzazione delle variabili
+        # Initialize variables
         self.synchObject = SynchObject(60)
         self.mixBus = MixBus014(self.synchObject)
         self.transitionType = self.mixBus.getEffectType()
@@ -53,6 +61,9 @@ class VideoMixerUI(QWidget):
         self.initConnections()
 
     def initUI(self):
+        """
+        Set up the user interface layout and widgets.
+        """
         main_layout = QVBoxLayout()
 
         main_layout.addWidget(self.top_bottom_splitter)
@@ -89,11 +100,17 @@ class VideoMixerUI(QWidget):
         self.setLayout(main_layout)
 
     def initGeometry(self):
+        """
+        Set up the initial geometry and sizes for the splitters and the main window.
+        """
         self.setFixedSize(1920, 1080)
         self.top_bottom_splitter.setSizes([652, 400])
         self.bottom_splitter.setSizes([1139, 753])
 
     def initConnections(self):
+        """
+        Initialize signal-slot connections.
+        """
         self.top_bottom_splitter.splitterMoved.connect(self.print_sizes)
         self.bottom_splitter.splitterMoved.connect(self.print_sizes)
         QTimer.singleShot(500, self.delayedInit)
@@ -103,20 +120,41 @@ class VideoMixerUI(QWidget):
 
     @property
     def matrix(self) -> dict:
+        """
+        Get the current matrix dictionary.
+        :return: The current matrix dictionary.
+        """
         return self._matrix
 
     @matrix.setter
     def matrix(self, value):
+        """
+        Set the matrix dictionary.
+        :param value: The new matrix dictionary.
+        """
         self._matrix = value
 
     def set_matrix_value(self, index, value):
+        """
+        Set a specific value in the matrix dictionary.
+        :param index: The index to set.
+        :param value: The value to set at the specified index.
+        """
         self._matrix[index] = value
 
     def delayedInit(self):
+        """
+        Perform delayed initialization tasks.
+        """
         self.monitor_preview.setAutoFit()
         self.monitor_program.setAutoFit()
 
     def print_sizes(self, pos, index):
+        """
+        Print the sizes of the widgets in the splitters.
+        :param pos: The position of the splitter.
+        :param index: The index of the splitter.
+        """
         print("Top-Bottom Splitter Sizes:")
         print(f"Top Widget: {self.top_bottom_splitter.widget(0).size()}")
         print(f"Bottom Widget: {self.top_bottom_splitter.widget(1).size()}")
@@ -126,13 +164,19 @@ class VideoMixerUI(QWidget):
         print("-" * 50)
 
     def displayFrame(self):
+        """
+        Display the current frame on the preview and program monitors.
+        """
         prw, prg = self.mixBus.getMix()
         self.monitor_program.feedInput(prg)
         self.monitor_preview.feedInput(prw)
         self._dirtyFrame = self.monitor_program.getDirtyFrame()
 
     def getDirtyFrame(self):
-        # Assuming frame_dirty is a numpy array
+        """
+        Get the dirty frame from the monitor program.
+        :return: The dirty frame as a numpy array.
+        """
         if self._dirtyFrame is not None:
             return self._dirtyFrame
         else:
@@ -140,11 +184,8 @@ class VideoMixerUI(QWidget):
 
     def onMixerPanelSignal(self, data):
         """
-        Gestisce il segnale proveniente dal mixer panel.
-        data è un dizionario tipo:
-        {"tally": "previewChange", "input": number}
-        {"tally": "cut"}
-        {"tally": "auto"}
+        Handle the signal from the mixer panel.
+        :param data: The data from the mixer panel.
         """
         print(f"Data: {data}")
         if data["tally"] == "previewChange":
@@ -173,6 +214,10 @@ class VideoMixerUI(QWidget):
             self.setTransitionChange(int(data["input"]))
 
     def setTransitionChange(self, data):
+        """
+        Set the transition type based on the input data.
+        :param data: The input data to determine the transition type.
+        """
         if data == 1:  # mix
             self.transitionType = MIX_TYPE.MIX
         elif data == 2:  # dip
@@ -189,7 +234,6 @@ class VideoMixerUI(QWidget):
     def onMatrixSignal(self, data):
         """
         Handle the matrix signal by creating and setting the appropriate input based on the device type.
-
         :param data: Dictionary containing the input data.
         """
         print(f"Matrix signal: {data}")
@@ -224,21 +268,19 @@ class VideoMixerUI(QWidget):
 
     def handleVideoCapture(self, inputNumber, inputName, data):
         """
-        Questa funzione crea un video capture e lo imposta nella matrice.
-        :param inputNumber: l'indice dell'input
-        :param inputName: il nome dell'input
-        :param data:  i dati dell'input
-        :return:
+        Create and set a video capture in the matrix.
+        :param inputNumber: The input index.
+        :param inputName: The input name.
+        :param data: The input data.
         """
         deviceIndex = int(data["deviceIndex"])
         self.createVideoCapture(inputNumber, inputName, deviceIndex)
 
     def handleDesktopCapture(self, inputNumber, data):
         """
-        Questa funzione crea un desktop capture e lo imposta nella matrice.
-        :param inputNumber:
-        :param data:
-        :return:
+        Create and set a desktop capture in the matrix.
+        :param inputNumber: The input index.
+        :param data: The input data.
         """
         screenIndex = int(data["screenIndex"])
         desktopCapture = ScreenCapture(self.synchObject, screen_index=screenIndex)
@@ -246,25 +288,28 @@ class VideoMixerUI(QWidget):
 
     def handleStillImage(self, inputNumber, data):
         """
-        Questa funzione crea un'immagine fissa e la imposta nella matrice.
-        :param inputNumber:
-        :param data:
-        :return:
+        Create and set a still image in the matrix.
+        :param inputNumber: The input index.
+        :param data: The input data.
         """
         path = data["path"]
         stillImage = ImageLoader(self.synchObject, path)
         self.set_matrix_value(inputNumber, stillImage)
 
     def handleVideoPlayer(self, inputNumber, data):
+        """
+        Handle the video player input.
+        :param inputNumber: The input index.
+        :param data: The input data.
+        """
         # Implementation for handling video player
         pass
 
     def handleColorGenerator(self, inputNumber, data):
         """
-        Questa funzione crea un generatore di colori e lo imposta nella matrice.
-        :param inputNumber:
-        :param data:
-        :return:
+        Create and set a color generator in the matrix.
+        :param inputNumber: The input index.
+        :param data: The input data.
         """
         colorGenerator = ColorGenerator(self.synchObject)
         color = self.returnQColorFromDictionary(data["color"])
@@ -273,19 +318,17 @@ class VideoMixerUI(QWidget):
 
     def handleNoiseGenerator(self, inputNumber):
         """
-        Questa funzione crea un generatore di rumore e lo imposta nella matrice.
-        :param inputNumber:
-        :return:
+        Create and set a noise generator in the matrix.
+        :param inputNumber: The input index.
         """
         noiseGenerator = RandomNoiseImageGenerator(self.synchObject)
         self.set_matrix_value(inputNumber, noiseGenerator)
 
     def handleGradientGenerator(self, inputNumber, data):
         """
-        Questa funzione crea un generatore di gradienti e lo imposta nella matrice.
-        :param inputNumber:
-        :param data:
-        :return:
+        Create and set a gradient generator in the matrix.
+        :param inputNumber: The input index.
+        :param data: The input data.
         """
         gradientType = data["gradientType"].lower()
         color1 = self.returnQColorFromDictionary(data["color1"]['color'])
@@ -296,12 +339,12 @@ class VideoMixerUI(QWidget):
 
     def handleSmpteBarsGenerator(self, inputNumber, data):
         """
-        Questa funzione crea un generatore di barre SMPTE o FullBars
-        :param inputNumber:
-        :param data:
-        :return:
+        Create and set an SMPTE bars or FullBars generator in the matrix.
+        :param inputNumber: The input index.
+        :param data: The input data.
         """
-        if data['smpte'] == 0:
+        print(f"Data: {data}")
+        if data['deviceType'] == 0:
             smpteBars = FullBarsGenerator(self.synchObject)
         else:
             smpteBars = SMPTEBarsGenerator(self.synchObject)
@@ -309,19 +352,16 @@ class VideoMixerUI(QWidget):
 
     def handleCheckerBoardGenerator(self, inputNumber):
         """
-        Questa funzione crea un checkerboard generator e lo imposta nella matrice.
-        :param inputNumber:
-        :return:
+        Create and set a checkerboard generator in the matrix.
+        :param inputNumber: The input index.
         """
         checkerBoard = CheckerBoardGenerator(self.synchObject)
         self.set_matrix_value(inputNumber, checkerBoard)
 
     def updatePreviewProgram(self, inputNumber):
         """
-        Questa funzione aggiorna cos'è in program e cosa è in preview
-        nel caso in cui arrivi un segnale di cambio di input dalla matrice.
-        Controlla anche che l'input sia abilitato nel tastierino del mixer,
-        perchè per prevenire schermate nere di default sono disabilitati.
+        Update what is in program and preview based on the matrix input change signal.
+        Checks that the input is enabled in the mixer panel to prevent black screens.
         :param inputNumber: The number of the input to check.
         """
         if self.mixerPanel.btnDictionary["preview"] == inputNumber:
@@ -335,9 +375,8 @@ class VideoMixerUI(QWidget):
 
     def unplugFromMatrix(self, inputNumber):
         """
-        Questa funzione rimuove l'input dalla matrice.
-        :param inputNumber:
-        :return:
+        Remove the input from the matrix.
+        :param inputNumber: The input index to remove.
         """
         blackImage = ColorGenerator(self.synchObject)
         blackImage.setColor(QColor(0, 0, 0))
@@ -350,6 +389,11 @@ class VideoMixerUI(QWidget):
 
     @staticmethod
     def returnQColorFromDictionary(data):
+        """
+        Convert a dictionary with color information to a QColor object.
+        :param data: The dictionary containing the color data.
+        :return: The QColor object.
+        """
         r = data["r"]
         g = data["g"]
         b = data["b"]
@@ -357,11 +401,23 @@ class VideoMixerUI(QWidget):
         return color
 
     def createVideoCapture(self, inputNumber, inputName, deviceIndex):
+        """
+        Create a video capture and set it in the matrix.
+        :param inputNumber: The input index.
+        :param inputName: The input name.
+        :param deviceIndex: The device index for the video capture.
+        """
         videoCapture = VideoCapture013(self.synchObject, deviceIndex)
         self.set_matrix_value(inputNumber, videoCapture)
         print(f"debug: {inputNumber} {inputName} {deviceIndex} {self.matrix}")
 
     def updateInput(self, inputNumber, inputName, data):
+        """
+        Update the input in the matrix.
+        :param inputNumber: The input index.
+        :param inputName: The input name.
+        :param data: The input data.
+        """
         self.set_matrix_value(inputNumber, data)
 
 
@@ -371,4 +427,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = VideoMixerUI()
     window.show()
-    sys.exit(app.exec())
+    app.exec()

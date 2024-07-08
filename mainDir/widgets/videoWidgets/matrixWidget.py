@@ -8,15 +8,25 @@ from mainDir.widgets.videoWidgets.matrixWidgets.VideoCaptureWidget import VideoC
 from mainDir.widgets.videoWidgets.matrixWidgets.checkerboardWidget import CheckerboardWidget
 from mainDir.widgets.videoWidgets.matrixWidgets.colorWidget import ColorWidget
 from mainDir.widgets.videoWidgets.matrixWidgets.gradientGenerator import GradientGeneratorWidget
+from mainDir.widgets.videoWidgets.matrixWidgets.playlistWidget import PlaylistControlWidget
 from mainDir.widgets.videoWidgets.matrixWidgets.screenCaptureWidget import ScreenCaptureWidget
 from mainDir.widgets.videoWidgets.matrixWidgets.smpteWidget import SmpteWidget
 from mainDir.widgets.videoWidgets.matrixWidgets.stillLoader import StillLoaderWidget
 
 
 class MatrixWidget(QWidget):
+    """
+    MatrixWidget class to manage multiple input sources for video and image processing.
+    Provides UI components to select, configure, and activate different types of inputs.
+    """
     matrix_Signal = pyqtSignal(dict, name="matrix_SIGNAL")
 
     def __init__(self, parent=None):
+        """
+        Initialize the MatrixWidget.
+
+        :param parent: The parent widget.
+        """
         super().__init__(parent)
         self.current_index = 0
         self.setLayout(QVBoxLayout())
@@ -25,8 +35,8 @@ class MatrixWidget(QWidget):
                                "colorGenerator", "noiseGenerator", "gradientGenerator", "smpteBarsGenerator",
                                "checkerBoardGenerator"]
         main_layout = QGridLayout()
-        main_layout.setContentsMargins(5, 5, 5, 5)  # Ridurre i margini
-        main_layout.setSpacing(5)  # Ridurre la spaziatura tra i widget
+        main_layout.setContentsMargins(5, 5, 5, 5)  # Reduce margins
+        main_layout.setSpacing(5)  # Reduce spacing between widgets
 
         self.combo_boxes = []
         self.stacked_widgets = []
@@ -47,7 +57,7 @@ class MatrixWidget(QWidget):
             stacked_widget.addWidget(VideoCaptureWidget())  # Index 1 videoCapture
             stacked_widget.addWidget(ScreenCaptureWidget())  # Index 2 desktopCapture
             stacked_widget.addWidget(StillLoaderWidget())  # Index 3 stillImage
-            stacked_widget.addWidget(ColorWidget())  # Index 4 videoPlayer
+            stacked_widget.addWidget(PlaylistControlWidget())  # Index 4 videoPlayer
             stacked_widget.addWidget(ColorWidget())  # Index 5 colorGenerator
             stacked_widget.addWidget(NoiseGeneratorWidget())  # Index 6 NoiseGenerator
             stacked_widget.addWidget(GradientGeneratorWidget())  # Index 7 gradientGenerator
@@ -73,6 +83,11 @@ class MatrixWidget(QWidget):
         self.layout().addLayout(main_layout)
 
     def inputComboBoxChanged(self, index):
+        """
+        Handle changes in the input combo box selection.
+
+        :param index: The index of the selected item in the combo box.
+        """
         if index == 0:
             return  # "Select input" selected, do nothing
         sender = self.sender()
@@ -82,6 +97,13 @@ class MatrixWidget(QWidget):
         self.current_index = index
 
     def toggleCapture(self, state, comboBox, stacked_widget):
+        """
+        Handle toggling of the active checkbox to enable or disable the input.
+
+        :param state: The state of the checkbox (True for checked, False for unchecked).
+        :param comboBox: The combo box associated with the input.
+        :param stacked_widget: The stacked widget containing the input configuration widgets.
+        """
         index = comboBox.currentIndex()
         deviceName = comboBox.itemText(index)
         lblWidget = self.findChild(QLabel, f"lbl_{self.combo_boxes.index(comboBox) + 1}")

@@ -65,5 +65,5 @@ class VideoCaptureSupport:
 # Esempio di utilizzo
 capture_support = VideoCaptureSupport()
 print(capture_support.get_supported_codec())
-with open('../../playlistWidgets/playlistItems/supported_codecs.json', 'w') as file:
+with open('../../playlistWidgets/playlistItems/playListData/supported_codecs.json', 'w') as file:
     file.write(str(capture_support.get_supported_codec()))

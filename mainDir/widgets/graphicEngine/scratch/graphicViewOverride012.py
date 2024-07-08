@@ -149,7 +149,7 @@ if __name__ == "__main__":
     view = GraphicViewOverride(scene)
     view.initRenderHints()
 
-    source = QGraphicsPixmapItem(QPixmap(r"C:\pythonCode\openPyVision_013\testImage"))
+    source = QGraphicsPixmapItem(QPixmap(r"/testImage"))
     scene.addItem(source)
     view.show()
     app.exec()

@@ -3,7 +3,7 @@ import subprocess
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 
-from mainDir.widgets.playlistWidgets.playlistItems.audioThreadCalculator import VolumeCalculator
+from mainDir.widgets.playlistWidgets.playlistItems.playListData.audioThreadCalculator import VolumeCalculator
 from mainDir.widgets.playlistWidgets.playlistItems.scratch.old.test1 import BaseItem
 
 

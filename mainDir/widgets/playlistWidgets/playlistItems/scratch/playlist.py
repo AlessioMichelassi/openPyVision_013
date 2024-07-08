@@ -1,24 +1,9 @@
 import json
 from PyQt6.QtWidgets import *
-from PyQt6.QtCore import *
-from PyQt6.QtGui import *
 import sys
 
-from mainDir.widgets.playlistWidgets.playlistItems.imageItem012 import ItemImage
-from mainDir.widgets.playlistWidgets.playlistItems.videoItem012 import ItemVideo
+from mainDir.widgets.playlistWidgets.playlistItems.scratch.videoItem012 import ItemVideo
 
-class ProxyWidget(QWidget):
-    def __init__(self, item_type, path, parent=None):
-        super().__init__(parent)
-        self.item_type = item_type
-        self.path = path
-        self.initUI()
-
-    def initUI(self):
-        layout = QVBoxLayout()
-        self.label = QLabel(f"{self.item_type.capitalize()}: {self.path}")
-        self.setLayout(layout)
-        layout.addWidget(self.label)
 
 class Window(QWidget):
     def __init__(self):
@@ -26,7 +11,6 @@ class Window(QWidget):
         self.setWindowTitle("Playlist Manager")
 
         self.playlist = []
-        self.cache = {}  # Cache for storing widgets
         self.listWidget = QListWidget()
         self.btnAddVideo = QPushButton("+ Video")
         self.btnAddImage = QPushButton("+ Image")
@@ -75,64 +59,54 @@ class Window(QWidget):
     def addVideo(self):
         filePath, _ = QFileDialog.getOpenFileName(self, 'Select Video', '', 'Video Files (*.mp4 *.avi)')
         if filePath:
-            self.addItemToList('video', filePath)
+            widget = ItemVideo(filePath)
+            self.addItemToList(widget)
+            self.playlist.append({'type': 'video', 'path': filePath})
 
     def addImage(self):
         filePath, _ = QFileDialog.getOpenFileName(self, 'Select Image', '', 'Image Files (*.png *.jpg *.jpeg)')
         if filePath:
-            self.addItemToList('image', filePath)
+            # Implement image widget creation here
+            # widget = ItemImage(filePath)
+            # self.addItemToList(widget)
+            # self.playlist.append({'type': 'image', 'path': filePath})
+            pass
 
-    def addItemToList(self, item_type, file_path):
+    def addItemToList(self, widget):
         listItem = QListWidgetItem(self.listWidget)
-        widget = ProxyWidget(item_type, file_path)
         listItem.setSizeHint(widget.sizeHint())
         self.listWidget.addItem(listItem)
         self.listWidget.setItemWidget(listItem, widget)
-        self.playlist.append({'type': item_type, 'path': file_path})
-        self.cache[file_path] = widget
 
     def updatePlaylist(self):
         self.listWidget.clear()
         for item in self.playlist:
-            if item['path'] in self.cache:
-                widget = self.cache[item['path']]
-            else:
-                widget = ProxyWidget(item['type'], item['path'])
-                self.cache[item['path']] = widget
-            listItem = QListWidgetItem(self.listWidget)
-            listItem.setSizeHint(widget.sizeHint())
-            self.listWidget.addItem(listItem)
-            self.listWidget.setItemWidget(listItem, widget)
+            if item['type'] == 'video':
+                widget = ItemVideo(item['path'])
+                self.addItemToList(widget)
+            elif item['type'] == 'image':
+                # Implement image widget creation here
+                pass
 
     def removeItem(self):
         row = self.listWidget.currentRow()
-        if row >= 0:
-            item = self.listWidget.takeItem(row)
-            if item:
-                path = self.playlist[row]['path']
-                del self.playlist[row]
-                del self.cache[path]
+        if row != -1:
+            self.listWidget.takeItem(row)
+            del self.playlist[row]
 
     def moveUpItem(self):
         currentRow = self.listWidget.currentRow()
         if currentRow > 0:
-            self.swapItems(currentRow, currentRow - 1)
+            self.playlist.insert(currentRow - 1, self.playlist.pop(currentRow))
+            self.updatePlaylist()
             self.listWidget.setCurrentRow(currentRow - 1)
 
     def moveDownItem(self):
         currentRow = self.listWidget.currentRow()
         if currentRow < self.listWidget.count() - 1:
-            self.swapItems(currentRow, currentRow + 1)
+            self.playlist.insert(currentRow + 1, self.playlist.pop(currentRow))
+            self.updatePlaylist()
             self.listWidget.setCurrentRow(currentRow + 1)
-
-    def swapItems(self, fromRow, toRow):
-        self.playlist[fromRow], self.playlist[toRow] = self.playlist[toRow], self.playlist[fromRow]
-        fromItem = self.listWidget.takeItem(fromRow)
-        toItem = self.listWidget.takeItem(toRow)
-        self.listWidget.insertItem(fromRow, toItem)
-        self.listWidget.insertItem(toRow, fromItem)
-        self.listWidget.setItemWidget(toItem, self.cache[self.playlist[fromRow]['path']])
-        self.listWidget.setItemWidget(fromItem, self.cache[self.playlist[toRow]['path']])
 
     def loadPlaylist(self):
         filePath, _ = QFileDialog.getOpenFileName(self, 'Select Playlist', '', 'Playlist Files (*.json)')
@@ -145,18 +119,10 @@ class Window(QWidget):
         filePath, _ = QFileDialog.getSaveFileName(self, 'Save Playlist', '', 'Playlist Files (*.json)')
         if filePath:
             with open(filePath, 'w') as file:
-                json.dump(self.getPlaylist(), file, indent=4)
+                json.dump(self.playlist, file, indent=4)
 
-    def getPlaylist(self):
-        playlist = []
-        for i in range(self.listWidget.count()):
-            item_widget = self.listWidget.itemWidget(self.listWidget.item(i))
-            if isinstance(item_widget, ProxyWidget):
-                playlist.append({'type': item_widget.item_type, 'path': item_widget.path})
-        return playlist
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    screen = Window()
-    screen.show()
-    sys.exit(app.exec())
+app = QApplication(sys.argv)
+screen = Window()
+screen.show()
+sys.exit(app.exec())

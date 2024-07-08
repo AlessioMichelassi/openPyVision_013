@@ -1,12 +1,8 @@
-import json
-import cv2
-import subprocess
 from PyQt6.QtWidgets import *
-from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 import os
 
-from mainDir.widgets.playlistWidgets.playlistItems.baseItem import BaseItem
+from mainDir.widgets.playlistWidgets.playlistItems.playlistGraphicsEngine.baseItem import BaseItem
 
 
 class ItemImage(BaseItem):
@@ -16,6 +12,8 @@ class ItemImage(BaseItem):
         self.initConnections()
         if filePath:
             self.loadImageFile(filePath)
+            # crea una cartella temporanea per salvare i frame
+            self.temp_folder = os.path.join(os.path.dirname(filePath), "temp")
 
     def initConnections(self):
         super().initConnections()
