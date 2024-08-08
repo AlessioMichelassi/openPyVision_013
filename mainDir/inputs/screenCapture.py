@@ -7,6 +7,15 @@ from mainDir.inputs.baseClass import BaseClass
 
 
 # Questa classe gestisce la cattura dello schermo
+
+"""
+La classe ScreenCapture è una sottoclasse di BaseClass e gestisce la cattura dello schermo utilizzando la libreria 
+dxcam. La classe cattura i frame dello schermo a un FPS target e li ridimensiona se necessario.
+
+Nell'inizializzazione della classe, si inizializza la camera per catturare lo schermo. Se la cattura dello schermo
+fallisce, si prova a catturare lo schermo di default. La funzione checkSize controlla se il frame deve essere ridimensionato.
+La funzione capture_frame cattura un frame dallo schermo e la funzione getFrame restituisce il frame processato.
+"""
 class ScreenCapture(BaseClass):
 
     def __init__(self, synchObject, screen_index, resolution=QSize(1920, 1080), region=None, targetFps=60):
@@ -29,14 +38,14 @@ class ScreenCapture(BaseClass):
                 raise IndexError(f"Screen index {screen_index} out of range. Available screens: {len(screens)}")
             self.camera = dxcam.create(output_idx=screen_index, output_color="BGR", max_buffer_len=512)
             self.camera.start(target_fps=self.targetFps, video_mode=True)
-            self.synch_Object.synch_SIGNAL.connect(self.capture_frame)
+            self.synch_Object.synch_SIGNAL.connect(self.captureFrame)
             QTimer.singleShot(1000, self.checkSize)  # Controlla la dimensione del frame dopo 1 secondo
         except Exception as e:
             print(f"Failed to open screen source {screen_index}: {e}")
             try:
                 self.camera = dxcam.create(output_idx=0, output_color="BGR", max_buffer_len=512)
                 self.camera.start(target_fps=self.targetFps, video_mode=True)
-                self.synch_Object.synch_SIGNAL.connect(self.capture_frame)
+                self.synch_Object.synch_SIGNAL.connect(self.captureFrame)
                 QTimer.singleShot(1000, self.checkSize)
             except Exception as e:
                 print(f"Failed to fallback to screen source 0: {e}")
@@ -68,9 +77,9 @@ class ScreenCapture(BaseClass):
             self.camera = None
         super().stop()
 
-    def capture_frame(self):
+    def captureFrame(self):
         # Cattura un frame dallo schermo
-        self.update_fps()
+        self.updateFps()
         if self.camera:
             frame = self.camera.get_latest_frame()
             if frame is not None:

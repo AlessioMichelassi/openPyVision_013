@@ -15,9 +15,9 @@ class RandomNoiseImageGenerator(BaseClass):
     def stop(self):
         super().stop()
 
-    def capture_frame(self):
+    def captureFrame(self):
         self._frame = self.generate_noise()
-        self.update_fps()
+        self.updateFps()
 
     def getFrame(self):
         if self._frame is None:

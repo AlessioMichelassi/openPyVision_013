@@ -46,9 +46,9 @@ class FullBarsGenerator(BaseClass):
         super().stop()
         # No specific resources to release for ColorGenerator
 
-    def capture_frame(self):
+    def captureFrame(self):
         # ColorGenerator doesn't capture frames, it generates them
-        self.update_fps()
+        self.updateFps()
 
     def getFrame(self):
         return self._frame

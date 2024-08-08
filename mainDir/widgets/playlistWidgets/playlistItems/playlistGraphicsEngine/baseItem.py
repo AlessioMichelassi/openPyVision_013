@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 
+
 class BaseItem(QWidget):
     """
     Base class for media items in the playlist. Provides common UI elements and functionality
@@ -82,7 +83,8 @@ class BaseItem(QWidget):
         :return: The layout containing control widgets.
         """
         controlsLayout = QVBoxLayout()
-        self.cmbTransition.addItems(["cutToNext", "fadeToNext", "stop", "cutToBlack", "fadeToBlack", "loopForever", "loopNTimes"])
+        self.cmbTransition.addItems(
+            ["cutToNext", "fadeToNext", "stop", "cutToBlack", "fadeToBlack", "loopForever", "loopNTimes"])
         controlsLayout.addWidget(self.lblFileName)
         controlsLayout.addWidget(self.cmbTransition)
         return controlsLayout

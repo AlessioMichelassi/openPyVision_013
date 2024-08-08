@@ -24,9 +24,9 @@ class ImageLoader(BaseClass):
     def stop(self):
         super().stop()
 
-    def capture_frame(self):
+    def captureFrame(self):
         # No frame capture, just update the FPS
-        self.update_fps()
+        self.updateFps()
 
     def getFrame(self):
         return self._frame

@@ -134,6 +134,6 @@ class PlaylistWidget012(QWidget):
 
 if __name__ == '__main__':
     app = QApplication([])
-    widget = PlaylistWidget()
+    widget = PlaylistWidget012()
     widget.show()
     app.exec()

@@ -31,7 +31,7 @@ class BaseClass(QObject):
         super().__init__()
         self.synch_Object = synchObject
         self.resolution = resolution
-        self.synch_Object.synch_SIGNAL.connect(self.capture_frame)
+        self.synch_Object.synch_SIGNAL.connect(self.captureFrame)
         self.start_time = time.time()
         self.frame_count = 0
         self.total_time = 0
@@ -42,7 +42,6 @@ class BaseClass(QObject):
         """
         Rilascia le risorse e ferma il frame processor.
         """
-        self.stop()
         # Force garbage collection
         self.frame_processor = None
         # Imposta su None tutte le variabili
@@ -68,15 +67,15 @@ class BaseClass(QObject):
         except RuntimeError as e:
             print(f"Error stopping frame processor: {e}")
 
-    def capture_frame(self):
+    def captureFrame(self):
         """
         Cattura un frame, aggiornando l'FPS e creando un'immagine nera della risoluzione specificata.
         """
-        self.update_fps()
+        self.updateFps()
         image = np.zeros((self.resolution.height(), self.resolution.width(), 3), dtype=np.uint8)
         self._frame = np.ascontiguousarray(image)
 
-    def update_fps(self):
+    def updateFps(self):
         """
         Aggiorna il valore di FPS (frame per secondo).
         """
@@ -184,7 +183,7 @@ class BaseClass(QObject):
 
         return screen_result
 
-    def box_blur(self, image):
+    def boxBlur(self, image):
         # Applica un box blur utilizzando un kernel di dimensione ksize x ksize
         blurred_image = cv2.blur(image, (self._blurAmount, self._blurAmount))
         return blurred_image
@@ -214,7 +213,7 @@ class BaseClass(QObject):
         if self.isGrayScale:
             frame = self.grayScale(frame)
         if self.isBlurred:
-            frame = self.box_blur(frame)
+            frame = self.boxBlur(frame)
         return frame
 
     def getFrame(self):
@@ -223,3 +222,10 @@ class BaseClass(QObject):
         :return: Frame corrente.
         """
         return self._frame
+
+    def play(self):
+        """
+        Metodo play per la compatibilità con il VideoPlayerObject.
+        """
+        pass
+

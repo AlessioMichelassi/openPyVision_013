@@ -85,9 +85,9 @@ class PerlinNoiseImageGenerator(BaseClass):
         if self.noise_generation_thread.is_alive() and threading.current_thread() != self.noise_generation_thread:
             self.noise_generation_thread.join()
 
-    def capture_frame(self):
+    def captureFrame(self):
         self.generate_noise()
-        self.update_fps()
+        self.updateFps()
 
     def getFrame(self):
         return self._frame

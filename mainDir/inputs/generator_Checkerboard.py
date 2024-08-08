@@ -40,8 +40,8 @@ class CheckerBoardGenerator(BaseClass):
         checkerboard = np.dstack([checkerboard] * 3)
         return checkerboard
 
-    def capture_frame(self):
-        super().capture_frame()
+    def captureFrame(self):
+        super().captureFrame()
         self._frame = self.generate_checkerboard()
 
     def getFrame(self):

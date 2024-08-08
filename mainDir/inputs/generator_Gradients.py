@@ -47,8 +47,8 @@ class GradientGenerator(BaseClass):
     def stop(self):
         super().stop()
 
-    def capture_frame(self):
-        self.update_fps()
+    def captureFrame(self):
+        self.updateFps()
 
     def getFrame(self):
         return self._frame

@@ -2,13 +2,12 @@ import os
 import subprocess
 import time
 import wave
-
 import cv2
 import numpy as np
 import pyaudio
-from PyQt6.QtGui import *
-from PyQt6.QtCore import *
-from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtCore import QSize, QTimer, QElapsedTimer, QObject
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
 
 from mainDir.inputs.baseClass import BaseClass
 from mainDir.inputs.synchObject import SynchObject
@@ -24,7 +23,7 @@ class VideoPlayerObject(BaseClass):
         self.wf = None
         self.p = None
         self.stream = None
-        self.time = QTime()
+        self.time = QElapsedTimer()
 
     def __del__(self):
         self.stop()
@@ -96,7 +95,7 @@ class VideoPlayerObject(BaseClass):
             print(f"Errore durante l'estrazione dell'audio: {e}")
             return False
 
-    def next_frame(self):
+    def nextFrame(self):
         elapsed_time = self.time.elapsed()
         expected_frame = int(elapsed_time * self.realFrameRate / 1000.0)
         current_frame = int(self.videoCapture.get(cv2.CAP_PROP_POS_FRAMES))
@@ -111,8 +110,8 @@ class VideoPlayerObject(BaseClass):
             else:
                 self.stop()
 
-    def capture_frame(self):
-        self.update_fps()
+    def captureFrame(self):
+        self.updateFps()
 
     def getFrame(self):
         return self._frame
@@ -123,7 +122,7 @@ class VideoPlayerController(QObject):
         super().__init__()
         self.video_player = video_player
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.video_player.next_frame)
+        self.timer.timeout.connect(self.video_player.nextFrame)
 
     def play(self):
         self.video_player.play()
@@ -133,18 +132,21 @@ class VideoPlayerController(QObject):
         self.timer.stop()
         self.video_player.stop()
 
+    def getFrame(self):
+        return self.video_player.getFrame()
+
+    def getFps(self):
+        return self.video_player.fps
+
+    def captureFrame(self):
+        self.video_player.captureFrame()
+
 
 # Example usage of the VideoPlayerObject class
 
 if __name__ == "__main__":
     import sys
-    import time
 
-    from PyQt6.QtWidgets import *
-    from PyQt6.QtCore import *
-    from PyQt6.QtGui import *
-
-    from mainDir.inputs.synchObject import SynchObject
 
     class VideoApp(QApplication):
         def __init__(self, argv):
@@ -185,9 +187,11 @@ if __name__ == "__main__":
             self.controller.stop()
             self.exit()
 
+
     def main():
         app = VideoApp(sys.argv)
         app.exec()
+
 
     if __name__ == '__main__':
         import cProfile

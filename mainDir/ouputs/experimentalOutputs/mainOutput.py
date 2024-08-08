@@ -17,8 +17,8 @@ class MainOutSignal(BaseClass):
         self.mainViewer.setFixedSize(resolution)
         self.mainViewer.show()
 
-    def capture_frame(self):
-        super().capture_frame()
+    def captureFrame(self):
+        super().captureFrame()
         self._frame = np.zeros((self.resolution.height(), self.resolution.width(), 3), dtype=np.uint8)
 
     def feedFrame(self, frame):

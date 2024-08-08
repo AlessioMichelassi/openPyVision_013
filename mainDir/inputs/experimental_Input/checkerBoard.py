@@ -50,9 +50,9 @@ class CheckerboardGenerator(BaseClass):
     def stop(self):
         super().stop()
 
-    def capture_frame(self):
+    def captureFrame(self):
         self._numpyFrame = np.ascontiguousarray(self._frame)
-        self.update_fps()
+        self.updateFps()
 
     def getFrame(self):
         return self._numpyFrame

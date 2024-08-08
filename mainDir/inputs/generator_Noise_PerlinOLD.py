@@ -86,9 +86,9 @@ class PerlinNoiseImageGenerator(BaseClass):
     def stop(self):
         super().stop()
 
-    def capture_frame(self):
+    def captureFrame(self):
         self.generate_noise()
-        self.update_fps()
+        self.updateFps()
 
     def getFrame(self):
         return self._frame

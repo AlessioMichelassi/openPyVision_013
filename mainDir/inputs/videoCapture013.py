@@ -66,7 +66,9 @@ class VideoCapture013(BaseClass):
 
     def initCamera(self, cameraIndex, api=cv2.CAP_ANY):
         self.camera = cv2.VideoCapture(cameraIndex, api)
-        #self.camera.set(cv2.CAP_PROP_SETTINGS, 1)
+
+    def openDefaultSettingsInterface(self):
+        self.camera.set(cv2.CAP_PROP_SETTINGS, 1)
 
     def set_camera_properties(self):
         success = True
@@ -90,7 +92,7 @@ class VideoCapture013(BaseClass):
         super().stop()
         # No specific resources to release for ColorGenerator
 
-    def capture_frame(self):
+    def captureFrame(self):
         if self.camera:
 
             frame_width = self.camera.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -100,7 +102,7 @@ class VideoCapture013(BaseClass):
             else:
                 self._frame = self.camera.read()[1]
 
-        self.update_fps()
+        self.updateFps()
 
     def getFrame(self):
         return self._frame
