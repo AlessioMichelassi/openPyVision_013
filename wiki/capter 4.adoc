@@ -925,7 +925,7 @@ if __name__ == '__main__':
 *Media Time: 0.008719*
 ----
 
-![][image25]
+image::https://github.com/AlessioMichelassi/openPyVision_013/blob/master/imgs/image45.png[]
 
 
 The result gives us a good average time, but the next question is: can we do better?
