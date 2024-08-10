@@ -1,0 +1,15 @@
+= 4.0 - Video Mixing
+
+image::https://github.com/AlessioMichelassi/openPyVision_013/blob/master/wiki/imgs/image46.jpg
+
+The simplest way to mix two images together is to add them. It may sound crazy, but this is mathematically what was done with film, and the result was once called “double exposure.” If the subject is shot against a black background, adding it to another image creates a ghostly effect. Georges Méliès created hundreds of films using this technique.
+
+[source,python]
+----
+out_image = clamp(input1 + input2)
+----
+
+This approach is a direct translation of the analog method used in film, where multiple exposures were summed to create a final image. Practically, if the subject is shot against a black background and then added to another image, you get a ghostly effect. The simplicity of this operation makes it easy to understand how images can be combined, but it also introduces limitations such as value clamping.
+
+In graphic design software, mathematical operations on pixels are often referred to as "Blending Modes." In Photoshop, the “Add” operation is known as “Color Dodge.” Other blending modes include “Screen” and “Lighten,” which achieve similar effects with different mathematical operations that help mitigate clamping issues. You can delve into the mathematics behind blending modes on pegtop.net, where Jens Gruschel maintains a blog describing the mathematics used by graphics engines (https://www.pegtop.net/delphi/articles/blendmodes/).
+
