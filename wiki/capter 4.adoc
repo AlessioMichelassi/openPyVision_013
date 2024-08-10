@@ -517,17 +517,15 @@ output = program \times (1 - \alpha) + stinger \times \alpha
 
 Let's take a look at an image of the stinger:
 
-image::https://github.com/AlessioMichelassi/openPyVision_013/blob/master/wiki/imgs/image20.png[]
-image::https://github.com/AlessioMichelassi/openPyVision_013/blob/master/wiki/imgs/image21.png[]
+image::https://github.com/AlessioMichelassi/openPyVision_013/blob/master/wiki/imgs/stinger1.png[]
 
 As mentioned, this image has four channels: the first three, b, g, r, are the color channels, while the fourth is an image, shown next to it, in black and white, which identifies the points where the image is transparent (black or zero) or completely opaque (255 or white).
 
-image::https://github.com/AlessioMichelassi/openPyVision_013/blob/master/wiki/imgs/image22.png[]
-image::https://github.com/AlessioMichelassi/openPyVision_013/blob/master/wiki/imgs/image23.png[]
+image::https://github.com/AlessioMichelassi/openPyVision_013/blob/master/wiki/imgs/stinger2.png[]
 
 To mix it with another image, the procedure is as follows: if we invert the alpha channel, we obtain its negative, which, when multiplied by our program image, will appear black in the areas where the stinger is not black, and similarly, the stinger will appear black in the areas where its alpha value indicates it should be completely transparent. By adding the two images together, we get the composite image:
 
-image::https://github.com/AlessioMichelassi/openPyVision_013/blob/master/wiki/imgs/image24.png[]
+image::https://github.com/AlessioMichelassi/openPyVision_013/blob/master/wiki/imgs/image37.png[]
 
 This technique is the mathematical equivalent of what was done in film. The black represented the unexposed part of the film, the part that was still untouched. With an optical printer, masks were created on acetate sheets, called Matte, leaving the part that was black for us transparent and painting the part that was white for us black. In this way, a copy of the live-action film was made with these holes in the image. The process was repeated using another image with the negative of the matte, and then the two films were projected simultaneously and copied onto a new film.
 
