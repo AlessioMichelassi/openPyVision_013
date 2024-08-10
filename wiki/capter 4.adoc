@@ -1,6 +1,6 @@
 = 4.0 - Video Mixing
 
-image::https://github.com/AlessioMichelassi/openPyVision_013/blob/master/wiki/imgs/image46.jpg
+image::https://github.com/AlessioMichelassi/openPyVision_013/blob/master/wiki/imgs/image46.jpg[]
 
 The simplest way to mix two images together is to add them. It may sound crazy, but this is mathematically what was done with film, and the result was once called “double exposure.” If the subject is shot against a black background, adding it to another image creates a ghostly effect. Georges Méliès created hundreds of films using this technique.
 
