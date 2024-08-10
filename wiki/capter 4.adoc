@@ -531,6 +531,9 @@ This technique is the mathematical equivalent of what was done in film. The blac
 
 You can learn more about the techniques used by starting with the Wikipedia article on link:https://en.wikipedia.org/wiki/Optical_printer[optical printers].
 
+There is a documentary that you can find on you tube about I.L.M. (Industrial Light and Magic) that shows the optical printer in action. link:https://www.youtube.com/watch?v=qwMLOjqPmbQ[Industrial Light and Magic Documentary].
+
+
 To recreate this technique and perform it in real-time, I conducted various experiments to find the best method for performing this operation. Matrix multiplication is an expensive operation; however, I realized that many of the required operations can be precomputed, so the results are already calculated when needed. Let's examine the list of necessary operations:
 
 1. Split the channels of the stinger image:
