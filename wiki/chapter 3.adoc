@@ -1,4 +1,4 @@
-== 3.0 - Al-Jabr of Video
+== 3.0 - Video Matematics
 
 As we have seen in previous chapters, we can use NumPy to create bars, noise, or a gradient. The next step is to create signal generators that are useful, first of all, because they allow us to test the mixer without having an acquisition card or a USB camera available.
 
@@ -1171,6 +1171,7 @@ image::image19.png[]
 The CLAHE, [**Contrast Limited Adaptive Histogram Equalization**](https://en.wikipedia.org/wiki/Adaptive_histogram_equalization#Contrast_Limited_AHE), is an evolution of histogram equalization. It divides the image into small blocks (tiles) and equalizes each one separately. This approach limits noise amplification and improves local contrast, making it useful for images with significant contrast variations.
 
 [source,python]
+----
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
@@ -1190,6 +1191,336 @@ plt.show()
 ----
 image::imgs/image10.png[]
 
-We have seen how various contrast techniques can be applied both manually and automatically. Histogram equalization and CLAHE are powerful tools for enhancing image contrast, making details more visible and improving overall visual quality.
+We have seen how different contrast techniques can be applied both manually and automatically. Histogram equalization and CLAHE are powerful tools for enhancing image contrast, making details more visible and improving overall visual quality. However, when applied directly to RGB channels, they can alter the original colors, causing unwanted changes to the image.
 
-As a bonus for this chapter, I've included an enhanced version of the I/O graph that also includes some automatic contrast techniques.
+I included as a bonus for this chapter an improved version of the IO graph, which also includes some automatic contrast techniques.
+
+= 3.8 Contrast Speed
+
+Obviously, we want to understand whether our contrast operations guarantee us to maintain the frame rate and which of the operations allows us to achieve the desired result.
+
+We can try to create a method for linear contrast similar to the one proposed by Brinkman, which in some cases can be a quick and effective solution, a method similar to the one we created using the sigmoid with a gamma since, as we have seen, the operation is very fast and also implement the two methods for automatic contrast using histogram and CLAHE.
+
+[source,python]
+----
+import cv2
+import numpy as np
+import timeit
+
+
+
+
+# Metodo 1: Modifica Lineare del Contrasto
+def adjust_contrast_linear(image, alpha=1.5, beta=0):
+   return cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+
+# Metodo 2: Regolazione Gamma
+def adjust_contrast_gamma(image, gamma=1.0):
+   inv_gamma = 1.0 / gamma
+   table = np.array([(i / 255.0) ** inv_gamma * 255 for i in range(256)]).astype(np.uint8)
+   return cv2.LUT(image, table)
+
+def clahe(image, clip_limit=2.0, tile_grid_size=(8, 8)):
+   channels = cv2.split(image)
+   clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+   clahe_channels = [clahe.apply(channel) for channel in channels]
+   return cv2.merge(clahe_channels)
+
+def histogram_equalization(image):
+   channels = cv2.split(image)
+   eq_channels = [cv2.equalizeHist(channel) for channel in channels]
+   return cv2.merge(eq_channels)
+
+def add_text_to_image(image, text):
+   font = cv2.FONT_HERSHEY_SIMPLEX
+   font_scale = 1
+   color = (255, 255, 255)
+   thickness = 2
+   position = (10, 50)
+   return cv2.putText(image, text, position, font, font_scale, color, thickness, cv2.LINE_AA)
+
+# Genera un'immagine di test
+image = cv2.imread(r"\openPyVisionBook\openPyVisionBook\cap3\cap3_6\lena_std.tif")
+
+# Crea immagini con testo
+original_with_text = add_text_to_image(image.copy(), "Original")
+linear_with_text = add_text_to_image(adjust_contrast_linear(image, alpha=1.5, beta=20).copy(), "Linear Contrast")
+gamma_with_text = add_text_to_image(adjust_contrast_gamma(image, gamma=1.2).copy(), "Gamma Adjustment")
+clahe_with_text = add_text_to_image(clahe(image).copy(), "CLAHE")
+hist_eq_with_text = add_text_to_image(histogram_equalization(image).copy(), "Histogram Equalization")
+
+# Crea un mosaico di immagini su due righe
+first_row = np.hstack((original_with_text, linear_with_text, gamma_with_text))
+second_row = np.hstack((original_with_text, clahe_with_text, hist_eq_with_text))
+big_image = np.vstack((first_row, second_row))
+
+# Visualizza i risultati
+cv2.imshow("Contrast Adjustment", big_image)
+linear_test = timeit.timeit(lambda: adjust_contrast_linear(image, alpha=1.5, beta=20), number=1000)
+gamma_test = timeit.timeit(lambda: adjust_contrast_gamma(image, gamma=1.2), number=1000)
+clahe_test = timeit.timeit(lambda: clahe(image), number=1000)
+hist_eq_test = timeit.timeit(lambda: histogram_equalization(image), number=1000)
+
+print(f"Linear Contrast Adjustment: {linear_test:.2f} seconds for 1000 iterations = {linear_test / 1000:.4f} ms per iteration")
+print(f"Gamma Adjustment: {gamma_test:.2f} seconds for 1000 iterations = {gamma_test / 1000:.4f} ms per iteration")
+print(f"CLAHE: {clahe_test:.2f} seconds for 1000 iterations = {clahe_test / 1000:.4f} ms per iteration")
+print(f"Histogram Equalization: {hist_eq_test:.2f} seconds for 1000 iterations = {hist_eq_test / 1000:.4f} ms per iteration")
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+----
+
+```
+Linear Contrast Adjustment: 0.09 seconds for 1000 iterations = 0.0001 ms per iteration
+Gamma Adjustment: 0.13 seconds for 1000 iterations = 0.0001 ms per iteration
+CLAHE: 0.88 seconds for 1000 iterations = 0.0009 ms per iteration
+Histogram Equalization: 0.73 seconds for 1000 iterations = 0.0007 ms per iteration
+
+```
+
+The good news is that they are all very fast operations. The slightly less good news, which isn't so bad, is that CLAHE and histogram used this way tend to shift the colors, and by observing the colors of the original image, you can see how, in fact, the image has a red/magenta cast, but it may not be the operation we want to achieve.
+
+image::imgs/cap3_8_contrast01.png[]
+
+To address this issue, we can apply these techniques in the YUV domain, which separates luminance (Y) from chromatic information (U and V). This approach allows improving contrast without affecting the original colors of the image.
+
+The `clahe_yuv` method applies Contrast Limited Adaptive Histogram Equalization (CLAHE) only to the Y channel (luminance) of the YUV image. CLAHE is used to enhance local contrast without excessively amplifying noise, limiting the maximum contrast to avoid visual artifacts.
+
+1. Conversion to YUV: The RGB image is converted to the YUV color space.
+2. CLAHE on the Y channel: CLAHE is applied only to the Y channel, which contains luminance information.
+3. Reconversion to RGB: The modified image is reconverted to the RGB color space.
+
+This method maintains more natural colors compared to applying CLAHE directly to the RGB channels, as the contrast operation does not affect the U and V channels, which contain chromatic information.
+
+Similarly, the `histogram_equalization_yuv` method applies histogram equalization to the Y channel of a YUV image. This process redistributes luminance values evenly across the available range, improving the overall contrast of the image.
+
+1. Conversion to YUV: As with the CLAHE method, the RGB image is first converted to YUV.
+2. Equalization on the Y channel: Histogram equalization is applied only to the Y channel, enhancing contrast without affecting colors.
+3. Reconversion to RGB: The modified image is then reconverted to the RGB color space.
+
+[source,python]
+----
+import cv2
+import numpy as np
+import timeit
+
+
+# Metodo 1: Modifica Lineare del Contrasto
+def adjust_contrast_linear(image, alpha=1.5, beta=0):
+   return cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+
+# Metodo 2: Regolazione Gamma
+def adjust_contrast_gamma(image, gamma=1.0):
+   inv_gamma = 1.0 / gamma
+   table = np.array([(i / 255.0) ** inv_gamma * 255
+                          for i in range(256)]).astype(np.uint8)
+   return cv2.LUT(image, table)
+
+def clahe(image, clip_limit=2.0, tile_grid_size=(8, 8)):
+   channels = cv2.split(image)
+   clahe = cv2.createCLAHE(clipLimit=clip_limit,
+                                 tileGridSize=tile_grid_size)
+   clahe_channels = [clahe.apply(channel) for channel in channels]
+   return cv2.merge(clahe_channels)
+
+def histogram_equalization(image):
+   channels = cv2.split(image)
+   eq_channels = [cv2.equalizeHist(channel) for channel in channels]
+   return cv2.merge(eq_channels)
+
+def clahe_yuv(image, clip_limit=2.0, tile_grid_size=(8, 8)):
+   yuv_img = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
+   clahe = cv2.createCLAHE(clipLimit=clip_limit,
+                             tileGridSize=tile_grid_size)
+   yuv_img[:, :, 0] = clahe.apply(yuv_img[:, :, 0])
+   return cv2.cvtColor(yuv_img, cv2.COLOR_YUV2BGR)
+
+def histogram_equalization_yuv(image):
+   yuv_img = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
+   yuv_img[:, :, 0] = cv2.equalizeHist(yuv_img[:, :, 0])
+   return cv2.cvtColor(yuv_img, cv2.COLOR_YUV2BGR)
+
+def add_text_to_image(image, text):
+   font = cv2.FONT_HERSHEY_SIMPLEX
+   font_scale = 1
+   color = (255, 255, 255)
+   thickness = 2
+   position = (10, 50)
+   return cv2.putText(image, text, position, font, font_scale, color, thickness, cv2.LINE_AA)
+
+# Genera un'immagine di test
+image = cv2.imread(r"\openPyVisionBook\openPyVisionBook\cap3\cap3_6\lena_std.tif")
+
+# Crea immagini con testo
+original_with_text = add_text_to_image(image.copy(), "Original")
+linear_with_text = add_text_to_image(adjust_contrast_linear(image, alpha=1.5, beta=20).copy(), "Linear Contrast")
+gamma_with_text = add_text_to_image(adjust_contrast_gamma(image, gamma=1.2).copy(), "Gamma Adjustment")
+clahe_with_text = add_text_to_image(clahe(image).copy(), "CLAHE")
+hist_eq_with_text = add_text_to_image(histogram_equalization(image).copy(), "Histogram Equalization")
+clahe_yuv_with_text = add_text_to_image(clahe_yuv(image).copy(), "CLAHE YUV")
+hist_eq_yuv_with_text = add_text_to_image(histogram_equalization_yuv(image).copy(), "Histogram YUV")
+
+
+# Crea un mosaico di immagini su due righe
+first_row = np.hstack((original_with_text, linear_with_text, clahe_with_text, hist_eq_with_text))
+second_row = np.hstack((original_with_text, gamma_with_text, clahe_yuv_with_text, hist_eq_yuv_with_text))
+big_image = np.vstack((first_row, second_row))
+
+# Visualizza i risultati
+cv2.imshow("Contrast Adjustment", big_image)
+
+# Test delle prestazioni
+linear_test = timeit.timeit(lambda: adjust_contrast_linear(image, alpha=1.5, beta=20), number=1000)
+gamma_test = timeit.timeit(lambda: adjust_contrast_gamma(image, gamma=1.2), number=1000)
+clahe_test = timeit.timeit(lambda: clahe(image), number=1000)
+hist_eq_test = timeit.timeit(lambda: histogram_equalization(image), number=1000)
+clahe_yuv_test = timeit.timeit(lambda: clahe_yuv(image), number=1000)
+hist_eq_yuv_test = timeit.timeit(lambda: histogram_equalization_yuv(image), number=1000)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+----
+
+```
+Linear Contrast Adjustment: 0.09 seconds for 1000 iterations = 0.0001 ms per iteration
+Gamma Adjustment: 0.11 seconds for 1000 iterations = 0.0001 ms per iteration
+CLAHE: 0.93 seconds for 1000 iterations = 0.0009 ms per iteration
+Histogram Equalization: 0.56 seconds for 1000 iterations = 0.0006 ms per iteration
+CLAHE YUV: 0.56 seconds for 1000 iterations = 0.0006 ms per iteration
+Histogram YUV: 0.37 seconds for 1000 iterations = 0.0004 ms per iteration
+```
+
+image::imgs/cap3_8_contrast02.png[]
+
+= 3.9 Base Class Extended
+
+The next step is to add these fundamental operations we have seen to our base class.
+
+For now, let's create variables that can be modified to enable or disable a particular effect:
+
+```
+clip_limit = 2.0
+tile_grid_size = (8, 8)
+gamma = 1.0
+isFrameInverted = False
+isFrameAutoScreen = False
+isFrameCLAHE = False
+isFrameHistogramEqualization = False
+isFrameCLAHEYUV = False
+isFrameHistogramEqualizationYUV = False
+```
+
+Now we can add the various methods at the end of the code:
+
+[source,python]
+----
+@staticmethod
+def invertFrame(image):
+   """
+   Inverts the frame colors.
+   """
+   return cv2.bitwise_not(image)
+
+
+@staticmethod
+def autoScreenFrame(image):
+   """
+   Automatically creates a screen frame.
+   """
+   inv1 = cv2.bitwise_not(image)
+   mult = cv2.multiply(inv1, inv1, scale=1.0 / 255.0)
+   return cv2.bitwise_not(mult).astype(np.uint8)
+
+
+@staticmethod
+def getRGBChannels(frame):
+   """
+   Returns the RGB channels of a frame.
+   """
+   return cv2.split(frame)
+
+
+@staticmethod
+def setRGBChannels(channels):
+   """
+   Sets the RGB channels of a frame.
+   """
+   return cv2.merge(channels)
+
+
+@staticmethod
+def applyGammaByLut(image, gamma):
+   inv_gamma = 1.0 / gamma
+   table = np.array([(i / 255.0) ** inv_gamma * 255
+                     for i in range(256)]).astype(np.uint8)
+   return cv2.LUT(image, table)
+
+
+@staticmethod
+def applyCLAHE(image, clip_limit=2.0, tile_grid_size=(8, 8)):
+   """
+   Applies the Contrast Limited Adaptive Histogram Equalization (CLAHE) to the image.
+   """
+   clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+   return clahe.apply(image)
+
+
+@staticmethod
+def applyHistogramEqualization(image):
+   """
+   Applies the Histogram Equalization to the image.
+   """
+   return cv2.equalizeHist(image)
+
+
+@staticmethod
+def applyCLAHEYUV(image, clip_limit=2.0, tile_grid_size=(8, 8)):
+   """
+   Applies the Contrast Limited Adaptive Histogram Equalization (CLAHE) to the Y channel of the YUV image.
+   """
+   yuv_img = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
+   clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+   yuv_img[:, :, 0] = clahe.apply(yuv_img[:, :, 0])
+   return cv2.cvtColor(yuv_img, cv2.COLOR_YUV2BGR)
+
+
+@staticmethod
+def applyHistogramEqualizationYUV(image):
+   """
+   Applies the Histogram Equalization to the Y channel of the YUV image.
+   """
+   yuv_img = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
+   yuv_img[:, :, 0] = cv2.equalizeHist(yuv_img[:, :, 0])
+   return cv2.cvtColor(yuv_img, cv2.COLOR_YUV2BGR)
+
+----
+Now what remains to be done is to establish in `getFrame` whether one of the functions has been activated and return the modified frame.
+
+[source,python]
+----
+def getFrame(self):
+   if self.isFrameInverted:
+       self._frame = self.invertFrame(self._frame)
+   if self.isFrameAutoScreen:
+       self._frame = self.autoScreenFrame(self._frame)
+   if self.gamma != 1.0:
+       self._frame = self.applyGammaByLut(self._frame, self.gamma)
+   if self.isFrameCLAHE:
+       self._frame = self.applyCLAHE(self._frame)
+   if self.isFrameHistogramEqualization:
+       self._frame = self.applyHistogramEqualization(self._frame)
+   if self.isFrameCLAHEYUV:
+       self._frame = self.applyCLAHEYUV(self._frame)
+   if self.isFrameHistogramEqualizationYUV:
+       self._frame =
+               self.applyHistogramEqualizationYUV(self._frame)
+   return self._frame
+
+----
+
+The order of effects has been chosen considering that:
+
+- Effects that alter colors (such as inversion or screen) should be applied before contrast corrections.
+- Contrast correction effects (CLAHE, histogram equalization) should be applied last to optimize visual quality.
+
+Operations take place in the `getFrame` function because it is usually not modified in the child class. This architecture allows you to keep the base class clean and focused, while the child classes can focus on the specific task of generating the frame, knowing that the effects will be correctly applied at the rendering stage.
+
