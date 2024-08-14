@@ -1,4 +1,4 @@
-== 3.0 - Video Matematics
+== 3.0 - Video Mathematics
 
 As we have seen in previous chapters, we can use NumPy to create bars, noise, or a gradient. The next step is to create signal generators that are useful, first of all, because they allow us to test the mixer without having an acquisition card or a USB camera available.
 
