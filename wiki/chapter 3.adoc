@@ -1524,3 +1524,4 @@ The order of effects has been chosen considering that:
 
 Operations take place in the `getFrame` function because it is usually not modified in the child class. This architecture allows you to keep the base class clean and focused, while the child classes can focus on the specific task of generating the frame, knowing that the effects will be correctly applied at the rendering stage.
 
+If we try to test our extended base class with the effects enabled we can notice some slowdowns in the frame rate that we will make more acceptable later.

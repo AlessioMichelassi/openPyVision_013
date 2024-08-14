@@ -13,6 +13,7 @@ from mainDir.inputs.generator_bars_SMPTE import SMPTEBarsGenerator
 from mainDir.inputs.screenCapture import ScreenCapture
 from mainDir.inputs.synchObject import SynchObject
 
+
 # NOT WORKING PROPERLY
 class WidgetTest(QWidget):
     def __init__(self):
