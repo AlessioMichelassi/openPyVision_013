@@ -2,7 +2,6 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import *
 
-from mainDir.widgets.generics.lblWidget import LblWidget
 from mainDir.widgets.videoWidgets.matrixWidgets.NoiseGenerator import NoiseGeneratorWidget
 from mainDir.widgets.videoWidgets.matrixWidgets.VideoCaptureWidget import VideoCaptureWidget
 from mainDir.widgets.videoWidgets.matrixWidgets.checkerboardWidget import CheckerboardWidget

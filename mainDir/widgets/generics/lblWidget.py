@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtWidgets import QLineEdit
 
 
@@ -23,7 +23,7 @@ class LblWidget(QLineEdit):
             self.name = name
             self.setText(self.name)
         self.setObjectName(f"lblInput_{index}")
-        self.setBaseSize(size)
+        self.setBaseSize(QSize(size[0], size[1]))
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setStyleSheet(self.lblStyle)
         self.setReadOnly(True)
@@ -41,3 +41,17 @@ class LblWidget(QLineEdit):
         self.name = self.text()
         self.setReadOnly(True)
 
+# test class
+
+if __name__ == "__main__":
+    import sys
+    from PyQt6.QtWidgets import QApplication, QVBoxLayout, QWidget
+
+    app = QApplication(sys.argv)
+    widget = QWidget()
+    layout = QVBoxLayout(widget)
+    for i in range(1, 6):
+        lbl = LblWidget("Input", i, (100, 30))
+        layout.addWidget(lbl)
+    widget.show()
+    sys.exit(app.exec())

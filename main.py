@@ -11,32 +11,49 @@ from PyQt6.QtWidgets import *
 
 from mainDir.mainUI_013 import VideoMixerUI
 from mainDir.ouputs.mainOut_Viewer import CV_MainOutViewer
-from mainDir.widgets.videoWidgets.matrixWidget import MatrixWidget
+
+# Define constants for colors
+WINDOW_COLOR = QColor(53, 53, 53)
+TEXT_COLOR = Qt.GlobalColor.white
+BASE_COLOR = QColor(42, 42, 42)
+ALTERNATE_BASE_COLOR = QColor(66, 66, 66)
+BRIGHT_TEXT_COLOR = Qt.GlobalColor.red
+LINK_COLOR = QColor(42, 130, 218)
+DISABLED_TEXT_COLOR = QColor(127, 127, 127)
+DISABLED_HIGHLIGHT_COLOR = QColor(80, 80, 80)
 
 
-def setPalette(_app):
-    _app.setStyle("Fusion")
-    darkPalette = QPalette()
-    darkPalette.setColor(QPalette.ColorRole.Window, QColor(53, 53, 53))
-    darkPalette.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.white)
-    darkPalette.setColor(QPalette.ColorRole.Base, QColor(42, 42, 42))
-    darkPalette.setColor(QPalette.ColorRole.AlternateBase, QColor(66, 66, 66))
-    darkPalette.setColor(QPalette.ColorRole.ToolTipBase, Qt.GlobalColor.white)
-    darkPalette.setColor(QPalette.ColorRole.ToolTipText, Qt.GlobalColor.white)
-    darkPalette.setColor(QPalette.ColorRole.Text, Qt.GlobalColor.white)
-    darkPalette.setColor(QPalette.ColorRole.Button, QColor(53, 53, 53))
-    darkPalette.setColor(QPalette.ColorRole.ButtonText, Qt.GlobalColor.white)
-    darkPalette.setColor(QPalette.ColorRole.BrightText, Qt.GlobalColor.red)
-    darkPalette.setColor(QPalette.ColorRole.Link, QColor(42, 130, 218))
-    darkPalette.setColor(QPalette.ColorRole.Highlight, QColor(42, 130, 218))
-    darkPalette.setColor(QPalette.ColorRole.HighlightedText, Qt.GlobalColor.white)
-    darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText, QColor(127, 127, 127))
-    darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text, QColor(127, 127, 127))
-    darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, QColor(127, 127, 127))
-    darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Highlight, QColor(80, 80, 80))
-    darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.HighlightedText, QColor(127, 127, 127))
+def setPalette(app):
+    app.setStyle("Fusion")
+    dark_palette = QPalette()
 
-    _app.setPalette(darkPalette)
+    # Extract repetitive setting of colors to a function
+    def set_color(palette, role, color):
+        palette.setColor(role, color)
+
+    # Normal state colors
+    set_color(dark_palette, QPalette.ColorRole.Window, WINDOW_COLOR)
+    set_color(dark_palette, QPalette.ColorRole.WindowText, TEXT_COLOR)
+    set_color(dark_palette, QPalette.ColorRole.Base, BASE_COLOR)
+    set_color(dark_palette, QPalette.ColorRole.AlternateBase, ALTERNATE_BASE_COLOR)
+    set_color(dark_palette, QPalette.ColorRole.ToolTipBase, TEXT_COLOR)
+    set_color(dark_palette, QPalette.ColorRole.ToolTipText, TEXT_COLOR)
+    set_color(dark_palette, QPalette.ColorRole.Text, TEXT_COLOR)
+    set_color(dark_palette, QPalette.ColorRole.Button, WINDOW_COLOR)
+    set_color(dark_palette, QPalette.ColorRole.ButtonText, TEXT_COLOR)
+    set_color(dark_palette, QPalette.ColorRole.BrightText, BRIGHT_TEXT_COLOR)
+    set_color(dark_palette, QPalette.ColorRole.Link, LINK_COLOR)
+    set_color(dark_palette, QPalette.ColorRole.Highlight, LINK_COLOR)
+    set_color(dark_palette, QPalette.ColorRole.HighlightedText, TEXT_COLOR)
+
+    # Disabled state colors
+    dark_palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText, DISABLED_TEXT_COLOR)
+    dark_palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text, DISABLED_TEXT_COLOR)
+    dark_palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, DISABLED_TEXT_COLOR)
+    dark_palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Highlight, DISABLED_HIGHLIGHT_COLOR)
+    dark_palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.HighlightedText, DISABLED_TEXT_COLOR)
+
+    app.setPalette(dark_palette)
 
 
 class VideoApp(QApplication):

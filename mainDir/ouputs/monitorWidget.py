@@ -11,7 +11,6 @@ from mainDir.ouputs.mainOut_Viewer import CV_MainOutViewer
 from mainDir.widgets.generics.btnStyle import btnMonitorStyle
 from mainDir.widgets.graphicEngine.graphicSceneOverride012 import GraphicSceneOverride012
 from mainDir.widgets.graphicEngine.graphicViewOverride013 import GraphicViewOverride013
-from mainDir.widgets.videoWidgets.rgbParade import RGBParade
 
 
 class MonitorWidget012(QWidget):
@@ -391,7 +390,6 @@ class MonitorWidget012(QWidget):
 
 if __name__ == '__main__':
     from mainDir.inputs.synchObject import SynchObject
-    from mainDir.inputs.generator_bars_EBU import FullBarsGenerator
 
     def updateMonitor():
         """
